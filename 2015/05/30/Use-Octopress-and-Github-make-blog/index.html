@@ -1,0 +1,729 @@
+<!doctype html>
+<html class="theme-next   use-motion ">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Octopress,GitHub,博客," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.2" />
+
+
+
+
+
+
+<meta name="description" content="搭建之前参考过比较多的博客，大多是根据官方Octopress设置教程和官方Octopress部署到GitHub教程操作，我这里根据自身的情况做下记录，个人更倾向于按照这个流程去搭建更容易理解。我更推荐读者（如果有的话)，先读完整篇博客，再按照octopress官方教程去操作。">
+<meta name="keywords" content="Octopress,GitHub,博客">
+<meta property="og:type" content="article">
+<meta property="og:title" content="菜鸟学习使用Octopress+GitHub搭建博客">
+<meta property="og:url" content="http://monotone.github.io/2015/05/30/Use-Octopress-and-Github-make-blog/index.html">
+<meta property="og:site_name" content="好好单调">
+<meta property="og:description" content="搭建之前参考过比较多的博客，大多是根据官方Octopress设置教程和官方Octopress部署到GitHub教程操作，我这里根据自身的情况做下记录，个人更倾向于按照这个流程去搭建更容易理解。我更推荐读者（如果有的话)，先读完整篇博客，再按照octopress官方教程去操作。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-10-18T09:17:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="菜鸟学习使用Octopress+GitHub搭建博客">
+<meta name="twitter:description" content="搭建之前参考过比较多的博客，大多是根据官方Octopress设置教程和官方Octopress部署到GitHub教程操作，我这里根据自身的情况做下记录，个人更倾向于按照这个流程去搭建更容易理解。我更推荐读者（如果有的话)，先读完整篇博客，再按照octopress官方教程去操作。">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: 'hide',
+    motion: true
+  };
+</script>
+
+  <title> 菜鸟学习使用Octopress+GitHub搭建博客 | 好好单调 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  <!--[if lte IE 8]>
+  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
+    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
+           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
+           style='margin-left:auto;margin-right:auto;display: block;'/>
+    </a>
+  </div>
+<![endif]-->
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?27e8a96f4afcc9eb2cc7546ebed1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">好好单调</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">一个80末码农的自留地</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu ">
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                菜鸟学习使用Octopress+GitHub搭建博客
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            发表于
+            <time itemprop="dateCreated" datetime="2015-05-30T14:20:46+08:00" content="2015-05-30">
+              2015-05-30
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp; 分类于
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/学习Octopress/" itemprop="url" rel="index">
+                    <span itemprop="name">学习Octopress</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/05/30/Use-Octopress-and-Github-make-blog/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/05/30/Use-Octopress-and-Github-make-blog/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <span itemprop="articleBody"><p>搭建之前参考过比较多的博客，大多是根据<a href="http://octopress.org/docs/setup/" target="_blank" rel="external">官方Octopress设置教程</a>和<a href="http://octopress.org/docs/deploying/github/" target="_blank" rel="external">官方Octopress部署到GitHub教程</a>操作，我这里根据自身的情况做下记录，个人更倾向于按照这个流程去搭建更容易理解。<strong>我更推荐读者（如果有的话)，先读完整篇博客，再按照octopress官方教程去操作。</strong><br><a id="more"></a></p>
+<h3 id="熟悉Github-Pages"><a href="#熟悉Github-Pages" class="headerlink" title="熟悉Github Pages"></a>熟悉Github Pages</h3><p>关于GitHub我就不多说了，大把的资料，此外git我也是入门阶段，就不多说废话。在简单的了解过git之后，首先来了解下<a href="https://help.github.com/articles/what-are-github-pages/" target="_blank" rel="external">GitHub Pages</a></p>
+<p>GitHub Pages我个人理解，简单来说就是GitHub提供的网页程序。分为两种类型，一种是个人（或者组织）网址，这种网址需要固定项目名称为username.github.io，因此一个账号有一个，另一种是项目网站，不需要固定项目名称，但是需要固定这个项目上一个分支名为gh-pages，这种类型的网站是和项目相关的，所以可以有多个。</p>
+<p>通过 <a href="https://pages.github.com" target="_blank" rel="external">https://pages.github.com</a> 网页上的说明，测试了分别使用命令行和GitHub提供的自动生成工具去创建User Site 和 Projects Site。比较下这四种情况，其实都是按照GitHub的约定，提供一个index.html作为网站入口，至于网站做成什么样子，则是这个index.html里提供的内容了。可以发现通过GitHub自动工具生成的Pages会多一个stylesheets文件夹和params.json文件，姑且不深究这两个文件是做什么的，大概能猜测要么就是index.html里要用的，要么就是GitHub在生成网页时要用到的（感觉会做网页和懂html的童鞋应该很容易就知道这是做什么用的）。</p>
+<p>我这里主要目的就是要知道后面octopress到底做了什么，才能在github上搭建博客。通过上面的了解，猜测如果如果对于project site，需要创建gh-pages然后至少要有index.html这个文件来弄出一个首页。</p>
+<h3 id="搭建Octopress博客"><a href="#搭建Octopress博客" class="headerlink" title="搭建Octopress博客"></a>搭建Octopress博客</h3><p>接下来就是根据 <a href="http://octopress.org/docs/setup/" target="_blank" rel="external">官方Octopress设置教程</a>来配置Octopress了。</p>
+<h4 id="修改-RubyGem-默认安装源"><a href="#修改-RubyGem-默认安装源" class="headerlink" title="修改 RubyGem 默认安装源"></a>修改 RubyGem 默认安装源</h4><p>这里注意在执行<code>gem install bundler</code>之前，最好重新设置下RubyGem的安装源，虽然我不懂RubyGem到底是什么，不过这个源应该就类似于服务器吧，需要从服务器上下数据，国外的源很慢或者直接访问不到，通过一下方式可以更改。</p>
+<ol>
+<li>通过<code>gem sources</code>查看当前使用的源，默认是<code>https://rubygems.org/</code></li>
+<li>首先删除那个源<code>gem sources --remove https://rubygems.org/</code></li>
+<li>使用<code>gem sources -a http://ruby.taobao.org/</code>增加国内淘宝源</li>
+<li>使用<code>gem sources -l</code>确认当前只有<code>ruby.taobao.org</code>这个源</li>
+</ol>
+<h4 id="修改bundle的源"><a href="#修改bundle的源" class="headerlink" title="修改bundle的源"></a>修改bundle的源</h4><p><del>Bundler是什么，目前我也不知道。总之在执行<code>bundle insall</code>之前，修改下clone下来的Octopress目录下的Gemfile。将里面<code>source &quot;https://rubygems.org&quot;</code>更改为<code>source &quot;http://ruby.taobao.org/&quot;</code>。这样执行<code>bundle install</code>也会比较快。</del><strong>后面我再测试的时候发现改成了淘宝的这个源反而不行了，直接使用原来的源就可以了</strong></p>
+<h4 id="rake-install做了些什么"><a href="#rake-install做了些什么" class="headerlink" title="rake install做了些什么"></a>rake install做了些什么</h4><p>上一步根据Octopress的官方教程进行了配置，最后一步的<code>rake install</code>执行时，可以看到实际在执行一些常用的命令如<code>cp</code>和<code>mkdir</code>。主要是从<code>.themes/classic</code>下拷贝source和sass文件夹的内容到当前目录下。另外还构建了两个空目录<code>source/_posts</code>和<code>public</code>。<strong>原来这里还有一个隐藏文件夹<code>.themes</code>，打开隐藏文件显示，在Finder里出现了不少隐藏文件，这里姑且不管。</strong></p>
+<h3 id="Generate-amp-Preview"><a href="#Generate-amp-Preview" class="headerlink" title="Generate &amp; Preview"></a>Generate &amp; Preview</h3><p>接下来先不去写博客和部署到GitHub，先来执行一下生成命令<code>rake generate</code>，执行过后去看下clone下的目录，通过修改日期可以看到，public文件夹下的都是刚才增加上去的，另外还有一个<code>source/stylesheets/screen.css</code>。</p>
+<p>比较一下source文件夹下的内容和public文件夹下的内容，可以发现除了<code>public/sitemap.xml</code>这个文件之外，public文件夹里的内容在source下都有，source还多了_includes、_layouts、_posts三个文件夹。<strong>那么到这里我们可以推断，<code>rake generate</code>命令执行的内容大多数就是拷贝文件夹了</strong></p>
+<p>接下来执行<code>rake preview</code>，看下命令行提示，大概意思是开启了对source和public的监听，如果发生了改变则会自动generate一下。另外如果需要停止，就按<code>ctrl + C</code>，然后去本地浏览器敲<code>localhost:4000</code>，查看下预览效果。</p>
+<p>等了半天终于出来了，这么慢据说有两个原因，第一是因为Octopress的配置里有使用Facebook等被墙了的东东，第二是因为我使用的sifari浏览器。姑且不去验证这些。（可以参考一下这篇博客：<a href="http://droidyue.com/blog/2014/06/22/fix-octopress-slow-loading-speed-issue-in-china-mainland/" target="_blank" rel="external">解决Octopress博客访问慢的问题</a>）</p>
+<p>总之从这两个命令去比较文件的变化，主要就是增加了public下的若干文件和文件夹。并且public下面明显的有一个index.html，所以我猜测index.html就说最终网页上看到的主页。不信可以直接在浏览器中打开index.html比较下。</p>
+<h3 id="发个博文瞧一瞧"><a href="#发个博文瞧一瞧" class="headerlink" title="发个博文瞧一瞧"></a>发个博文瞧一瞧</h3><p>总算到了可以测试博文的环节了，参考<a href="http://octopress.org/docs/blogging/" target="_blank" rel="external">官方教程</a>。<strong>如果使用的时zsh终端，那么要注意对于使用“［］”时是需要转意的，比如<code>rake new_post[&quot;title&quot;]</code>，就需要写成<code>rake new_post\[&quot;title&quot;\]</code>或者<code>noglob rake new_post[&quot;title&quot;]</code>才行。当然官方推荐直接在.zshrc中加上<code>alias rake=&quot;noglob rake&quot;</code>。</strong></p>
+<p>执行<code>rake new_post</code>之后，会在<code>source/_posts</code>下生成一个markdown文件（这里以2015-05－29-test.markdown为例），这个文件名是以日期和刚才提供给new_post的那个标题组成的（中文会被转成拼音），再次执行<code>rake generate</code>，然后去看public目录，发现其blog文件夹修改日期发生了更改，这下面多了一个<code>2015/05/29/test/index.html</code>。查看一下这个index.html，正好和我们刚才的markdown文件内容对应。</p>
+<p>然后再次<code>rake preview</code>，然后去浏览器查看，就多了刚才的博文了。</p>
+<h3 id="啰嗦一下"><a href="#啰嗦一下" class="headerlink" title="啰嗦一下"></a>啰嗦一下</h3><p>看了下前面写的，好像有点啰嗦，但这确实就是我自己搭建这个博客研究的过程，我在写当前这段文字的时候，还不是很清楚如何在GitHub上既能保存好octopress的配置，又能正常的写博客发布（参考了别人的博客后，还没进行实践）。</p>
+<p>总之到了上面那一步，至少知道了在本地，最终我们预览的时候，其实是针对public目录的，后面部署到GitHub上时，官网也告诉我们其实就是把这个目录下的东西弄到了GitHub上，就能看到Octopress搭建的博客了。而Octopress的源码配置如source目录，plugin目录以及外面的配置文件，可以选择保存到GitHub上，也可以保存在本地。</p>
+<p>另外上面我也没有记录自己在测试修改_config.yml这个文件来查看效果时的过程。要注意的主要是permalink这个字段，后面的描述是相对于public的，我写成<code>/blog/:categories/:title.html</code>，这里最后一段写成:title.html，因为我不喜欢所有的博文都生成tittle/index.html这种形式。此外博文markdown文件中的<code>categories:</code>字段，注意冒号后面的必须有空格，多个分类是按顺序嵌套的，不存在则会创建。</p>
+<h3 id="开始部署到GitHub"><a href="#开始部署到GitHub" class="headerlink" title="开始部署到GitHub"></a>开始部署到GitHub</h3><p>是时候部署一下了。前面根据教程的介绍和自己的观察，发现最终反正就是把博客网站要用的内容全部组织起来放到public文件夹下，然后以index.html为入口点，来呈现博客。所以如果想部署到GitHub上，是不是只要把public文件夹下的内容全部上传到username.github.io项目上就可以了呢？</p>
+<p>那就测试一下，从GitHub上clone下来我的个人主页<code>git clone git@github.com:monotone/monotone.github.io</code>，然后拷贝<code>public</code>文件夹下的内容到刚才克隆下来的目录下（<strong>注意public下本来就没有.git文件夹，也就是说public文件夹本来是没有受版本库控制的</strong>）。接着执行<code>git add *</code>，然后<code>git commit -m &quot;增加静态博客内容&quot;</code>，最后<code>git push origin master</code>，就可以去浏览器中输入<code>monotone.github.io</code>浏览效果了。实际结果果然和前面使用<code>localhost:4000</code>看到的一样。</p>
+<p>大概知道了原理，这里先清空一下 monotong.github.io版本库，然后根据教程<a href="http://octopress.org/docs/deploying/github/" target="_blank" rel="external">Deploing to Github Pages</a>操作一遍。</p>
+<p>首先是<code>rake setup_Github_pages</code>，官方上有说明这个命令执行的操作有：</p>
+<ol>
+<li>要求输入Pages的版本库url，我这里是<code>git@github.com:monotone/monotone.github.io</code></li>
+<li>重命名原来指向<code>imathis/octopress</code>的地址的<code>origin</code>为<code>octopress</code>。</li>
+<li>增加Pages的Pages的版本库url作为默认的源，命名为<code>origin</code>。</li>
+<li>从master切换到source分支（原来没有就创建source）。</li>
+<li>根据提供的Pages Url来配置博客的url地址。</li>
+<li>在_deploy目录下初始化一个master分支用来发布。</li>
+</ol>
+<p>之前使用<code>git remote -v</code>查看原来的源（当前是master分支）：</p>
+<blockquote>
+<p>origin    git://github.com/imathis/octopress.git (fetch)</p>
+<p>origin    git://github.com/imathis/octopress.git (push)</p>
+</blockquote>
+<p>执行<code>rake setup_github_pages</code>后的源（注意此时分支已经切换到source了）：</p>
+<blockquote>
+<p>octopress    git://github.com/imathis/octopress.git (fetch)</p>
+<p>octopress    git://github.com/imathis/octopress.git (push)</p>
+<p>origin    git@github.com:monotone/monotone.github.io.git (fetch)  </p>
+<p>origin    git@github.com:monotone/monotone.github.io.git (push)</p>
+</blockquote>
+<p>可以看到原来origin对应的是octopress.git，现在对应成monotone.git了。<br>继续根据教程执行<code>rake deploy</code>和<code>git add .</code> <code>git commit -m &#39;your message&#39;</code> <code>git push origin source</code>。一切顺利的话，到此就算部署完成了。</p>
+<p><strong>概括一下，为了让public目录下的东西能发布到GitHub的master分支下，以呈现我们的博客，而又不会同时把octopress的源码放上去，可以单独的把public目录加到monotone.github.io项目的master分支中，Octopress这里是另外弄了一个目录叫<code>_deploy</code>。所以上面的操作首先更改原来octopress.git项目的源的名称origin为octopress，然后将我的源monotone.git更名为origin，然后将_deploy目录加入到monotone.git项目的master分支中。后面执行<code>rake deploy</code>其实就是把public目录下的东西拷贝到_deploy中，然后发布到monotone.git的Master分钟上去。最后执行的<code>git add .</code>、<code>git comit -m &#39;your message&#39;</code>、<code>git push origin source</code>这三部，就是将octopress的源码提交到monotone.git的source中去，这样在monotone.git下，就存在两个分支了，并且既保存了我们的博客，又保存了octopress的源码配置，如果我们有更改配置，就提交到source，如果新发布了博客，就提交到master。</strong></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>我这么懒的人总算驱使自己断断续续的写完了这么长的博客，这个过程增加了我对octopress搭建博客的理解和git命令的熟练度，当然也增加了我对markdown语法的熟练度。</p>
+<p>最后的最后，整理一遍搭建这个环境的流程：</p>
+<ol>
+<li>创建空的GitHub个人用户网址项目monotone.github.io</li>
+<li>克隆octopress到本地：<code>git clone git@github.com:imathis/octopress.git</code></li>
+<li>进入到octopress目录：<code>cd octopress</code></li>
+<li>修改淘宝源，然后安装bundler：<code>gem sources --remove https://rubygems.org/</code>，<code>gem sources --a http://ruby.taobao.org/</code>，<code>sudo gem install bundler</code></li>
+<li>搭建bundle环境：<code>bundle install</code></li>
+<li>安装默认主题：<code>rake install</code></li>
+<li>去掉那些需要连接被墙网站的插件（可选）</li>
+<li>关联GitHub：<code>rake setup_github_pages</code></li>
+<li>部署到GitHub：<code>rake deploy</code></li>
+<li>上传octopress源码配置：<code>git add .</code>、<code>git commit -m &quot;message&quot;</code>、<code>git push origin source</code></li>
+<li>去浏览器中输入：<code>monotone.github.io</code></li>
+</ol>
+</span>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Octopress/" rel="tag">#Octopress</a>
+          
+            <a href="/tags/GitHub/" rel="tag">#GitHub</a>
+          
+            <a href="/tags/博客/" rel="tag">#博客</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/06/14/Choose-Octopress /" rel="prev" title="选择 Octopress">
+                选择 Octopress <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+        </div>
+
+        
+
+
+        
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/05/30/Use-Octopress-and-Github-make-blog/"
+           data-title="菜鸟学习使用Octopress+GitHub搭建博客" data-url="http://monotone.github.io/2015/05/30/Use-Octopress-and-Github-make-blog/">
+      </div>
+    
+  </div>
+
+
+      </div>
+
+      
+        
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" src="https://avatars0.githubusercontent.com/u/4949550?v=3&s=460" alt="单调" itemprop="image"/>
+          <p class="site-author-name" itemprop="name">单调</p>
+        </div>
+        <p class="site-description motion-element" itemprop="description">谁能够划船不用浆</p>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            
+              <span class="site-state-item-count">1</span>
+              <span class="site-state-item-name">分类</span>
+              
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            
+              <span class="site-state-item-count">12</span>
+              <span class="site-state-item-name">标签</span>
+              
+          </div>
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#熟悉Github-Pages"><span class="nav-number">1.</span> <span class="nav-text">熟悉Github Pages</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#搭建Octopress博客"><span class="nav-number">2.</span> <span class="nav-text">搭建Octopress博客</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#修改-RubyGem-默认安装源"><span class="nav-number">2.1.</span> <span class="nav-text">修改 RubyGem 默认安装源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#修改bundle的源"><span class="nav-number">2.2.</span> <span class="nav-text">修改bundle的源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#rake-install做了些什么"><span class="nav-number">2.3.</span> <span class="nav-text">rake install做了些什么</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Generate-amp-Preview"><span class="nav-number">3.</span> <span class="nav-text">Generate & Preview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#发个博文瞧一瞧"><span class="nav-number">4.</span> <span class="nav-text">发个博文瞧一瞧</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#啰嗦一下"><span class="nav-number">5.</span> <span class="nav-text">啰嗦一下</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#开始部署到GitHub"><span class="nav-number">6.</span> <span class="nav-text">开始部署到GitHub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+      
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="icon-next-heart fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">单调</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+
+  
+    
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"dandiao"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+    
+     
+
+
+    
+  
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.2"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.2"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+<script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+<script type="text/javascript" src="/js/motion.js?v=0.4.5.2" id="motion.global"></script>
+
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.2" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    motionMiddleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+      if (CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  <script type="text/javascript" src="/js/bootstrap.js"></script>
+
+  
+  
+
+  
+  
+
+</body>
+</html>

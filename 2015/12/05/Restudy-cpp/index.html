@@ -1,0 +1,688 @@
+<!doctype html>
+<html class="theme-next   use-motion ">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.2" />
+
+
+
+
+
+
+<meta name="description" content="C++由来已久，也做了好几年了，但是还是有好多功能没用到过，并且随着 c++11的推出，增加了不少新功能，这里开始做笔记。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="重拾 c++ ">
+<meta property="og:url" content="http://monotone.github.io/2015/12/05/Restudy-cpp/index.html">
+<meta property="og:site_name" content="好好单调">
+<meta property="og:description" content="C++由来已久，也做了好几年了，但是还是有好多功能没用到过，并且随着 c++11的推出，增加了不少新功能，这里开始做笔记。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-10-18T09:17:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="重拾 c++ ">
+<meta name="twitter:description" content="C++由来已久，也做了好几年了，但是还是有好多功能没用到过，并且随着 c++11的推出，增加了不少新功能，这里开始做笔记。">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: 'hide',
+    motion: true
+  };
+</script>
+
+  <title> 重拾 c++  | 好好单调 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  <!--[if lte IE 8]>
+  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
+    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
+           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
+           style='margin-left:auto;margin-right:auto;display: block;'/>
+    </a>
+  </div>
+<![endif]-->
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?27e8a96f4afcc9eb2cc7546ebed1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">好好单调</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">一个80末码农的自留地</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu ">
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                重拾 c++ 
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            发表于
+            <time itemprop="dateCreated" datetime="2015-12-05T00:15:52+08:00" content="2015-12-05">
+              2015-12-05
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/12/05/Restudy-cpp/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/12/05/Restudy-cpp/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <span itemprop="articleBody"><p>C++由来已久，也做了好几年了，但是还是有好多功能没用到过，并且随着 c++11的推出，增加了不少新功能，这里开始做笔记。<br><a id="more"></a></p>
+<h3 id="强枚举类型"><a href="#强枚举类型" class="headerlink" title="强枚举类型"></a>强枚举类型</h3><p>普通的 enum 类型是弱类型的，默认是整形，并且可以发生隐式类型转换，c++ 也有提供强类型的枚举类型：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">enum</span> <span class="class"><span class="keyword">class</span> <span class="title">MyEnum</span>	// <span class="title">class</span> 表示强枚举类型</span></div><div class="line"><span class="class">&#123;</span></div><div class="line">	EnumValue1,</div><div class="line">	EnumValue2 = <span class="number">10</span>,</div><div class="line">	EnumValue3</div><div class="line">&#125;</div><div class="line"><span class="comment">// 必须使用作用域操作符</span></div><div class="line">MyEnum value = MyEnum::EnumValue1;</div><div class="line"><span class="comment">// 此外，枚举值不会自动转换成整数，下面的代码是不合法的：</span></div><div class="line"><span class="keyword">if</span> (MyEnum::EnumValue3 == <span class="number">11</span>)&#123;...&#125;</div></pre></td></tr></table></figure>
+<p>默认情况下，枚举值的基本类型是整型，可以采用以下方式加以改变：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">enum</span> <span class="class"><span class="keyword">class</span> <span class="title">MyEnumLong</span>:</span> <span class="keyword">unsigned</span> <span class="keyword">long</span></div><div class="line">&#123;...&#125;</div></pre></td></tr></table></figure>
+<h3 id="std-array"><a href="#std-array" class="headerlink" title="std::array"></a>std::array</h3><p>常用的如<code>int arr[]</code>这种形式是来自于 C 的数组形式，C++ 有一种==大小固定==的特殊容器 std::array，来自于<array>头文件，基本是对 C 风格的数组进行了简单包装，但是具有以下好处：</array></p>
+<ul>
+<li>总是知道自身的大小</li>
+<li>不会自动转换为指针，从而避免某些类型的 bug。</li>
+<li>具有迭代器，可以方便的遍历元素。</li>
+</ul>
+<p>示例代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">array</span>&lt;<span class="keyword">int</span>, 3&gt; arr = &#123;<span class="number">9</span>, <span class="number">8</span>, <span class="number">7</span>&#125;;</div><div class="line"><span class="built_in">cout</span> &lt;&lt; <span class="string">"Array size = "</span> &lt;&lt; arr.size() &lt;&lt; <span class="built_in">endl</span>;</div><div class="line"><span class="built_in">cout</span> &lt;&lt; <span class="string">"Element 2 = "</span> &lt;&lt; arr[<span class="number">1</span>] &lt;&lt; <span class="built_in">endl</span>;</div></pre></td></tr></table></figure>
+<h3 id="基于区间的-for-循环"><a href="#基于区间的-for-循环" class="headerlink" title="基于区间的 for 循环"></a>基于区间的 for 循环</h3><p>这种循环允许方便地迭代容器中的元素，这种循环类型可以用于 C 风格的数组、初始化列表，也可以用于具有返回迭代器的 begin() 和 end()函数的类型。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">std</span>::<span class="built_in">array</span>&lt;<span class="keyword">int</span>, 4&gt; arr = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</div><div class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i : arr)&#123; </div><div class="line"><span class="comment">// 这里迭代时每次都制作了一个 int 类型的副本，可以考虑使用引用。</span></div><div class="line">	<span class="built_in">cout</span> &lt;&lt; i &lt;&lt; <span class="built_in">endl</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="替代的函数语法"><a href="#替代的函数语法" class="headerlink" title="替代的函数语法"></a>替代的函数语法</h3><p>自 C++11 以来，通过拖尾返回类型（trailing return type）支持一种替代的函数语法，这种语法在指定模板函数的返回类型时非常有用。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">auto func(int i) -&gt; int</div><div class="line">&#123;</div><div class="line">	<span class="keyword">return</span> i + <span class="number">2</span>;</div><div class="line">&#125;</div><div class="line"><span class="comment">// 该函数的返回类型放在行尾的箭头后面，具体调用的方法和普通函数语法相同，</span></div><div class="line"><span class="comment">// main()函数也可以使用这种替代语法：</span></div><div class="line">auto main() -&gt; int</div><div class="line">&#123;</div><div class="line">	<span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="关键字-auto-和-decltype"><a href="#关键字-auto-和-decltype" class="headerlink" title="关键字 auto 和 decltype"></a>关键字 auto 和 decltype</h3><p>关键字 decltype 把表达式作为实参，计算出该表达式的类型。例如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> x = <span class="number">123</span>;</div><div class="line"><span class="keyword">decltype</span>(x) y = <span class="number">456</span>;</div></pre></td></tr></table></figure>
+<p>这里要强调的是，auto 推断表达式的类型，会去除引用限定符和 const 限定符，而 decltype 没有去除这些限定符。例如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">const</span> <span class="built_in">string</span> message = <span class="string">"Test"</span>;</div><div class="line"><span class="function"><span class="keyword">const</span> <span class="built_in">string</span>&amp; <span class="title">foo</span><span class="params">()</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">	<span class="keyword">return</span> message;	</div><div class="line">&#125;</div><div class="line"><span class="keyword">auto</span> f1 = foo(); </div><div class="line"><span class="comment">// 因为 auto 去除了引用和 const 限定符，所以这里实际建立了message 的一个副本。</span></div><div class="line"><span class="comment">// 如果希望 f1 是一个 const 引用，就可以明确将它建立为一个引用，</span></div><div class="line"><span class="comment">// 并标记为 const。如：const auto&amp; f1 = foo();</span></div><div class="line"></div><div class="line"><span class="comment">// 另一个解决办法是使用 decltype，它没有去除任何限定符</span></div><div class="line"><span class="keyword">decltype</span>(foo()) f2 = foo();</div><div class="line"><span class="comment">// 这里 f2 是 const string&amp; 类型，但是这么写比较麻烦，要写两次 foo()，C++14提供了如下解决方法：</span></div><div class="line"><span class="keyword">decltype</span>(<span class="keyword">auto</span>) f3 = foo();</div></pre></td></tr></table></figure>
+<h3 id="智能指针"><a href="#智能指针" class="headerlink" title="智能指针"></a>智能指针</h3><p>为了避免常见的内存问题，应使用智能指针代替通常的 C 样式指针。C++ 中有三种智能指针：<code>std::unique_str</code>、<code>std::shared_ptr</code> 和 <code>std::weak_ptr</code>，他们都在头文件<code>&lt;memory&gt;</code>中定义。</p>
+<h5 id="unique-ptr"><a href="#unique-ptr" class="headerlink" title="unique_ptr"></a>unique_ptr</h5><p><code>unique_ptr</code> 类似于普通指针，但在 <code>unique_ptr</code> 超出作用于或被删除时，会自动释放内存或资源，它只属于它指向的对象，优点是发生异常情况必须释放资源时，它简化了代码（自动帮你释放了资源）。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">auto</span> anEmployee = <span class="built_in">std</span>::make_unique&lt;Employee&gt;;<span class="comment">// make_unique 用来创建 unique_ptr</span></div><div class="line"></div><div class="line"><span class="comment">// 如果编译器还不支持 C++14，可以使用如下形式代替：</span></div><div class="line"><span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;Employee&gt; anEmployee(<span class="keyword">new</span> Employee());</div></pre></td></tr></table></figure>
+<h5 id="shared-ptr"><a href="#shared-ptr" class="headerlink" title="shared_ptr"></a>shared_ptr</h5><p><code>shared_ptr</code> 允许数据的分布式“所有权”，每次指定 <code>shared_ptr</code> 时，都递增一个引用计数，指出数据又多了一个“拥有者”。<code>shared_ptr</code> 超出作用于或者被删除时，就递减引用计数。当引用计数为0时，就表示数据不再有任何拥有者，于是释放指针引用的对象。<br>同 <code>unique_ptr</code> 类似，可以使用 <code>make_shared</code>来创建<code>shared_ptr</code>。</p>
+<h5 id="weak-ptr"><a href="#weak-ptr" class="headerlink" title="weak_ptr"></a>weak_ptr</h5><p>使用<code>weak_ptr</code>可以观察<code>shared_ptr</code>,而不会递增或递减所链接<code>shared_ptr</code>的引用计数。</p>
+<p>总的原则就是，默认情况下使用 <code>unique_ptr</code>，如果有共享需求就使用<code>shared_ptr</code>。</p>
+<p>==注意新的 c++标准已经废弃了<code>auto_ptr</code>，所以不要再使用它。==</p>
+<h3 id="对-std-string-的几点补充"><a href="#对-std-string-的几点补充" class="headerlink" title="对 std::string 的几点补充"></a>对 std::string 的几点补充</h3><h5 id="std-string-字面量"><a href="#std-string-字面量" class="headerlink" title="std::string 字面量"></a>std::string 字面量</h5><p>当使用 auto 来表明字符串常亮时，如果希望 auto 推断出的是 std::string 类型，可以使用如形式：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">auto</span> string1 = <span class="string">"Hello World"</span>; <span class="comment">// auto 被推断为 char* 类型</span></div><div class="line"><span class="keyword">auto</span> string2 = <span class="string">"Hello world"</span>s; <span class="comment">// auto 被推断为 std::string 类型。</span></div></pre></td></tr></table></figure>
+<h5 id="类型转换函数"><a href="#类型转换函数" class="headerlink" title="类型转换函数"></a>类型转换函数</h5><p>std 命名空间包含很多辅助函数用于字符串和数值之间的转换，如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// to_string 的各种重载</span></div><div class="line"><span class="function"><span class="built_in">string</span> <span class="title">to_string</span><span class="params">(<span class="keyword">int</span> val)</span></span>;</div><div class="line"><span class="function"><span class="built_in">string</span> <span class="title">to_string</span><span class="params">(<span class="keyword">unsigned</span> val)</span></span>;</div><div class="line">...</div><div class="line"></div><div class="line"><span class="comment">// sto* 系列函数</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">stoi</span><span class="params">(<span class="keyword">const</span> <span class="built_in">string</span>&amp; str, <span class="keyword">size_t</span>* idx=<span class="number">0</span>, <span class="keyword">int</span> base=<span class="number">10</span>)</span></span>;</div><div class="line"><span class="function"><span class="keyword">long</span> <span class="title">stol</span><span class="params">(<span class="keyword">const</span> <span class="built_in">string</span>&amp; str, <span class="keyword">size_t</span>* idx=<span class="number">0</span>, <span class="keyword">int</span> base=<span class="number">10</span>)</span></span>;</div><div class="line">...</div><div class="line"><span class="comment">// idx 接收第一个为转换的字符的索引（从第几个字符开始转换）。</span></div></pre></td></tr></table></figure>
+<h5 id="原始字符串字面量"><a href="#原始字符串字面量" class="headerlink" title="原始字符串字面量"></a>原始字符串字面量</h5><p>通常我们定义字面量时如果含有特殊符号，需要用到转移符（比如<code>\&quot;</code>用来转移一个双引号）。原始字符串字面量可以让字符串不使用转移符而直接使用特殊符号，<strong>这个功能在操作数据库查询字符串和正则表达式时尤其有用。</strong>如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">string</span> str = <span class="string">R"(Hello, "</span>World<span class="string">"!)"</span>;</div><div class="line"><span class="comment">// 注意是以 R"(开头，然后以)"结束。</span></div><div class="line"><span class="comment">// 特别的，如果原始字符串字面量里面需要有)"这样和结束符一样的内容，可以使用自定义标记来代替括号作为起始和结束标记（通常选择字面量里面不会出现的标记）</span></div><div class="line"><span class="comment">// 例如我想定义字面量："你幸（姓）福吗？"，假设我使用“--”作为起始和结束标记</span></div><div class="line"><span class="built_in">string</span> str1 = <span class="string">R"--你幸（姓）福吗？--"</span>;</div></pre></td></tr></table></figure>
+<h3 id="使用-delete-标记函数不可用"><a href="#使用-delete-标记函数不可用" class="headerlink" title="使用 delete 标记函数不可用"></a>使用 delete 标记函数不可用</h3><p>某些情况下我们想禁用类的拷贝构造函数或者赋值函数，有两种方式，一种是将这两个函数声明为 private，并不提供任何实现。另外一种方式就是标记为 delete，这样当外部使用这两个函数的时候，编译器就会报错。如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">CMyClass</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line"><span class="keyword">public</span>:</div><div class="line">	CMyClass(<span class="keyword">const</span> CMyClass&amp; src) = <span class="keyword">delete</span>;</div><div class="line">	CMyClass&amp; <span class="keyword">operator</span>=(<span class="keyword">const</span> CMyClass&amp; rhs) = <span class="keyword">delete</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="在类中使用引用成员变量"><a href="#在类中使用引用成员变量" class="headerlink" title="在类中使用引用成员变量"></a>在类中使用引用成员变量</h3><p>在类中使用引用成员变量，必须注意只能在构造函数的初始化列表或者拷贝构造函数的初始化列表中初始化这个引用。</p>
+<h3 id="mutable-的使用"><a href="#mutable-的使用" class="headerlink" title="mutable 的使用"></a>mutable 的使用</h3><p>mutable 是为了告诉编译器在 const 类型的函数中，允许改变这个值，用法如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 假设以下代码在某个类中</span></div><div class="line"><span class="keyword">int</span> CMyClass::getValue() <span class="keyword">const</span></div><div class="line">&#123;</div><div class="line">	value++;</div><div class="line">	<span class="keyword">return</span> value;</div><div class="line">&#125;</div><div class="line"><span class="keyword">mutable</span> <span class="keyword">int</span> value;</div></pre></td></tr></table></figure>
+<h3 id="typedef的另一种实现方法"><a href="#typedef的另一种实现方法" class="headerlink" title="typedef的另一种实现方法"></a>typedef的另一种实现方法</h3><p><code>using string = std::string;</code>等效于<code>typedef std::string string;</code></p>
+<h3 id="使用-final-来禁用继承和重写"><a href="#使用-final-来禁用继承和重写" class="headerlink" title="使用 final 来禁用继承和重写"></a>使用 final 来禁用继承和重写</h3><p>C++允许将类标记为 final，当继承这个类的时候，编译器就会报错，格式为：<code>class CMyClass final{}</code>。<br>同理，也可以将函数标记为 final，这样子类就无法重写虚函数，格式为：<code>virtual void MyMethod() final;</code>。<br>这样当子类出现<code>virtual void MyMethod() overide;</code>时，就会报错。</p>
+<h3 id="重写基类的方法一定要加上-override"><a href="#重写基类的方法一定要加上-override" class="headerlink" title="重写基类的方法一定要加上 override"></a>重写基类的方法一定要加上 override</h3><p>override 告诉编译器，我这个函数就是重写父类的，如果父类没有匹配的虚函数，那么就报错。如果没有加上 override,那么当父类没有这个函数的时候，就是在排上类中增加了一个新的虚函数了。</p>
+<h3 id="使用基类的构造函数构造派生类对象"><a href="#使用基类的构造函数构造派生类对象" class="headerlink" title="使用基类的构造函数构造派生类对象"></a>使用基类的构造函数构造派生类对象</h3><p>有时候基类提供了带参数的构造函数，目的是让派生类始终能用到这个构造函数，并提供相应的参数来构造对象。这种情况下可以在派生类中显示的继成基类的构造函数，如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">CBase</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line"><span class="keyword">public</span>:</div><div class="line">	CBase(<span class="keyword">int</span> i)mValue(i)&#123;&#125;</div><div class="line">	</div><div class="line"><span class="keyword">protected</span>:</div><div class="line">	<span class="keyword">int</span> mValue;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">CDriverd</span>:</span> <span class="keyword">public</span> CBase</div><div class="line">&#123;</div><div class="line"><span class="keyword">public</span>: </div><div class="line">	<span class="keyword">using</span> CBase::CBase;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 这样就可以直接调用基类形式的构造函数来构造子类对象了</span></div><div class="line"><span class="function">CDriverd <span class="title">obj</span><span class="params">(<span class="number">1</span>)</span></span>;</div></pre></td></tr></table></figure>
+<p><strong>我在 vs2013上测试这个功能时，发现始终调用的是派生类的拷贝构造函数，比如上述例子中，编译器提示 CDriverd(const CDriverd&amp;)的第一个参数类型 int 无法转换成 const CDriverd&amp; 类型。即使我把拷贝构造函数禁用掉，也一样。暂时还不知道为什么。</strong></p>
+<p>另外使用这个特性要注意，显示继承只能继承全部，不能要求之继承某一个。</p>
+<h3 id="重写具有默认参数的函数，要注意默认参数不会被继承"><a href="#重写具有默认参数的函数，要注意默认参数不会被继承" class="headerlink" title="重写具有默认参数的函数，要注意默认参数不会被继承"></a>重写具有默认参数的函数，要注意默认参数不会被继承</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Super</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line"><span class="keyword">public</span>:</div><div class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">go</span><span class="params">(<span class="keyword">int</span> i = <span class="number">2</span>)</span></span></div><div class="line"><span class="function">	</span>&#123;</div><div class="line">		<span class="built_in">cout</span> &lt;&lt; <span class="string">"super： i = "</span> &lt;&lt; i &lt;&lt; <span class="built_in">endl</span>;</div><div class="line">	&#125; </div><div class="line">&#125;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Sub</span> :</span> <span class="keyword">public</span> Super</div><div class="line">&#123;</div><div class="line"><span class="keyword">public</span>:</div><div class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">go</span><span class="params">(<span class="keyword">int</span> i = <span class="number">7</span>)</span> override</span></div><div class="line"><span class="function">	</span>&#123;</div><div class="line">		<span class="built_in">cout</span> &lt;&lt; <span class="string">"sub： i = "</span> &lt;&lt; i &lt;&lt; <span class="built_in">endl</span>;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面的示例，当使用Super 的指针或者引用指向Sub 的实例调用 go 函数时，输出内容为<code>sub：i = 2</code>。这是因为 C++根据描述对象的表达式类型在编译时绑定默认参数，而不是根据实际的对象类型绑定参数。所以为了避免这种情况，建议在派生类中的默认参数和基类保持一致。</p>
+</span>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/12/04/elegant-parser-multidimensional-string-to-specified-type/" rel="next" title="如何优雅的解析多维字符串到指定类型">
+                <i class="fa fa-chevron-left"></i> 如何优雅的解析多维字符串到指定类型
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/02/29/share-wallpaper-for-programmer/" rel="prev" title="分享给程序员的壁纸">
+                分享给程序员的壁纸 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+        </div>
+
+        
+
+
+        
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/12/05/Restudy-cpp/"
+           data-title="重拾 c++ " data-url="http://monotone.github.io/2015/12/05/Restudy-cpp/">
+      </div>
+    
+  </div>
+
+
+      </div>
+
+      
+        
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" src="https://avatars0.githubusercontent.com/u/4949550?v=3&s=460" alt="单调" itemprop="image"/>
+          <p class="site-author-name" itemprop="name">单调</p>
+        </div>
+        <p class="site-description motion-element" itemprop="description">谁能够划船不用浆</p>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            
+              <span class="site-state-item-count">1</span>
+              <span class="site-state-item-name">分类</span>
+              
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            
+              <span class="site-state-item-count">12</span>
+              <span class="site-state-item-name">标签</span>
+              
+          </div>
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#强枚举类型"><span class="nav-number">1.</span> <span class="nav-text">强枚举类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#std-array"><span class="nav-number">2.</span> <span class="nav-text">std::array</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于区间的-for-循环"><span class="nav-number">3.</span> <span class="nav-text">基于区间的 for 循环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#替代的函数语法"><span class="nav-number">4.</span> <span class="nav-text">替代的函数语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关键字-auto-和-decltype"><span class="nav-number">5.</span> <span class="nav-text">关键字 auto 和 decltype</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#智能指针"><span class="nav-number">6.</span> <span class="nav-text">智能指针</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#unique-ptr"><span class="nav-number">6.0.1.</span> <span class="nav-text">unique_ptr</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#shared-ptr"><span class="nav-number">6.0.2.</span> <span class="nav-text">shared_ptr</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#weak-ptr"><span class="nav-number">6.0.3.</span> <span class="nav-text">weak_ptr</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对-std-string-的几点补充"><span class="nav-number">7.</span> <span class="nav-text">对 std::string 的几点补充</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#std-string-字面量"><span class="nav-number">7.0.1.</span> <span class="nav-text">std::string 字面量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#类型转换函数"><span class="nav-number">7.0.2.</span> <span class="nav-text">类型转换函数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#原始字符串字面量"><span class="nav-number">7.0.3.</span> <span class="nav-text">原始字符串字面量</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-delete-标记函数不可用"><span class="nav-number">8.</span> <span class="nav-text">使用 delete 标记函数不可用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在类中使用引用成员变量"><span class="nav-number">9.</span> <span class="nav-text">在类中使用引用成员变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mutable-的使用"><span class="nav-number">10.</span> <span class="nav-text">mutable 的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#typedef的另一种实现方法"><span class="nav-number">11.</span> <span class="nav-text">typedef的另一种实现方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-final-来禁用继承和重写"><span class="nav-number">12.</span> <span class="nav-text">使用 final 来禁用继承和重写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重写基类的方法一定要加上-override"><span class="nav-number">13.</span> <span class="nav-text">重写基类的方法一定要加上 override</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用基类的构造函数构造派生类对象"><span class="nav-number">14.</span> <span class="nav-text">使用基类的构造函数构造派生类对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重写具有默认参数的函数，要注意默认参数不会被继承"><span class="nav-number">15.</span> <span class="nav-text">重写具有默认参数的函数，要注意默认参数不会被继承</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+      
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="icon-next-heart fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">单调</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+
+  
+    
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"dandiao"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+    
+     
+
+
+    
+  
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.2"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.2"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+<script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+<script type="text/javascript" src="/js/motion.js?v=0.4.5.2" id="motion.global"></script>
+
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.2" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    motionMiddleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+      if (CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  <script type="text/javascript" src="/js/bootstrap.js"></script>
+
+  
+  
+
+  
+  
+
+</body>
+</html>
