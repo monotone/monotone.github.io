@@ -1,9 +1,22 @@
-<!doctype html>
-<html class="theme-next   use-motion ">
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
 
 
 
@@ -21,18 +34,42 @@
 
 
 
-  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
 
 
 
 
-  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
-<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
 
-<link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/favicons/safari-pinned-tab.svg?v=5.1.3" color="#222">
+
+
+  <link rel="manifest" href="/favicons/manifest.json">
+
+
+  <meta name="msapplication-config" content="/favicons/browserconfig.xml" />
+
 
 
   <meta name="keywords" content="Hexo, NexT" />
@@ -40,11 +77,6 @@
 
 
 
-
-
-
-
-  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.2" />
 
 
 
@@ -65,29 +97,42 @@
 
 
 
-<script type="text/javascript" id="hexo.configuration">
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
   var CONFIG = {
+    root: '/',
     scheme: 'Mist',
-    sidebar: 'hide',
-    motion: true
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
   };
 </script>
 
-  <title> 重拾 c++  | 好好单调 </title>
-</head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
-  <!--[if lte IE 8]>
-  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
-    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
-      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
-           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
-           style='margin-left:auto;margin-right:auto;display: block;'/>
-    </a>
-  </div>
-<![endif]-->
+  <link rel="canonical" href="http://monotone.github.io/2015/12/05/Restudy-cpp/"/>
+
+
+
+
+
+  <title>重拾 c++  | 好好单调</title>
   
+
+
 
 
 
@@ -95,7 +140,7 @@
     var _hmt = _hmt || [];
     (function() {
       var hm = document.createElement("script");
-      hm.src = "//hm.baidu.com/hm.js?27e8a96f4afcc9eb2cc7546ebed1";
+      hm.src = "https://hm.baidu.com/hm.js?27e8a96f4afcc9eb2cc7546ebed653f1";
       var s = document.getElementsByTagName("script")[0];
       s.parentNode.insertBefore(hm, s);
     })();
@@ -104,52 +149,95 @@
 
 
 
-  <div class="container one-column page-post-detail">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-meta ">
-  
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
 
-  <div class="custom-logo-site-title">
-    <a href="/"  class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <span class="site-title">好好单调</span>
-      <span class="logo-line-after"><i></i></span>
-    </a>
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好单调</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">一个80末码农的自留地</p>
+      
   </div>
-  <p class="site-subtitle">一个80末码农的自留地</p>
-</div>
 
-<div class="site-nav-toggle">
-  <button>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-  </button>
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
 </div>
 
 <nav class="site-nav">
   
 
   
-    <ul id="menu" class="menu ">
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
       
         
         <li class="menu-item menu-item-archives">
-          <a href="/archives" rel="section">
+          <a href="/archives/" rel="section">
             
-              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
             归档
           </a>
         </li>
       
         
-        <li class="menu-item menu-item-about">
-          <a href="/about" rel="section">
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
             
-              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
             
             关于
           </a>
@@ -157,67 +245,87 @@
       
 
       
-      
     </ul>
   
 
   
 </nav>
 
+
+
  </div>
     </header>
 
     <main id="main" class="main">
       <div class="main-inner">
-        <div id="content" class="content">
-          
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
 
   <div id="posts" class="posts-expand">
     
 
   
-  
 
   
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2015/12/05/Restudy-cpp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
 
     
       <header class="post-header">
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                重拾 c++ 
-              
-            
-          </h1>
+          <h1 class="post-title" itemprop="name headline">重拾 c++ </h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            发表于
-            <time itemprop="dateCreated" datetime="2015-12-05T00:15:52+08:00" content="2015-12-05">
-              2015-12-05
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-05T00:15:52+08:00">
+                2015-12-05
+              </time>
+            
+
+            
+
+            
           </span>
 
           
 
           
             
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2015/12/05/Restudy-cpp/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/12/05/Restudy-cpp/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
+          
+
+          
+          
+
+          
+
           
 
           
@@ -226,14 +334,16 @@
       </header>
     
 
-
-    <div class="post-body">
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
       
 
       
-        <span itemprop="articleBody"><p>C++由来已久，也做了好几年了，但是还是有好多功能没用到过，并且随着 c++11的推出，增加了不少新功能，这里开始做笔记。<br><a id="more"></a></p>
+        <p>C++由来已久，也做了好几年了，但是还是有好多功能没用到过，并且随着 c++11的推出，增加了不少新功能，这里开始做笔记。<br><a id="more"></a></p>
 <h3 id="强枚举类型"><a href="#强枚举类型" class="headerlink" title="强枚举类型"></a>强枚举类型</h3><p>普通的 enum 类型是弱类型的，默认是整形，并且可以发生隐式类型转换，c++ 也有提供强类型的枚举类型：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">enum</span> <span class="class"><span class="keyword">class</span> <span class="title">MyEnum</span>	// <span class="title">class</span> 表示强枚举类型</span></div><div class="line"><span class="class">&#123;</span></div><div class="line">	EnumValue1,</div><div class="line">	EnumValue2 = <span class="number">10</span>,</div><div class="line">	EnumValue3</div><div class="line">&#125;</div><div class="line"><span class="comment">// 必须使用作用域操作符</span></div><div class="line">MyEnum value = MyEnum::EnumValue1;</div><div class="line"><span class="comment">// 此外，枚举值不会自动转换成整数，下面的代码是不合法的：</span></div><div class="line"><span class="keyword">if</span> (MyEnum::EnumValue3 == <span class="number">11</span>)&#123;...&#125;</div></pre></td></tr></table></figure>
 <p>默认情况下，枚举值的基本类型是整型，可以采用以下方式加以改变：</p>
@@ -281,11 +391,24 @@
 <p>另外使用这个特性要注意，显示继承只能继承全部，不能要求之继承某一个。</p>
 <h3 id="重写具有默认参数的函数，要注意默认参数不会被继承"><a href="#重写具有默认参数的函数，要注意默认参数不会被继承" class="headerlink" title="重写具有默认参数的函数，要注意默认参数不会被继承"></a>重写具有默认参数的函数，要注意默认参数不会被继承</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Super</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line"><span class="keyword">public</span>:</div><div class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">go</span><span class="params">(<span class="keyword">int</span> i = <span class="number">2</span>)</span></span></div><div class="line"><span class="function">	</span>&#123;</div><div class="line">		<span class="built_in">cout</span> &lt;&lt; <span class="string">"super： i = "</span> &lt;&lt; i &lt;&lt; <span class="built_in">endl</span>;</div><div class="line">	&#125; </div><div class="line">&#125;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Sub</span> :</span> <span class="keyword">public</span> Super</div><div class="line">&#123;</div><div class="line"><span class="keyword">public</span>:</div><div class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">go</span><span class="params">(<span class="keyword">int</span> i = <span class="number">7</span>)</span> override</span></div><div class="line"><span class="function">	</span>&#123;</div><div class="line">		<span class="built_in">cout</span> &lt;&lt; <span class="string">"sub： i = "</span> &lt;&lt; i &lt;&lt; <span class="built_in">endl</span>;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>上面的示例，当使用Super 的指针或者引用指向Sub 的实例调用 go 函数时，输出内容为<code>sub：i = 2</code>。这是因为 C++根据描述对象的表达式类型在编译时绑定默认参数，而不是根据实际的对象类型绑定参数。所以为了避免这种情况，建议在派生类中的默认参数和基类保持一致。</p>
-</span>
+
       
     </div>
+    
+    
+    
+
+    
+
+    
+
+    
 
     <footer class="post-footer">
+      
+
+      
+      
       
 
       
@@ -297,6 +420,8 @@
               </a>
             
           </div>
+
+          <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
@@ -311,6 +436,10 @@
       
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -321,25 +450,19 @@
   </div>
 
 
+          </div>
+          
+
+
+          
+
+  
+
+
+
         </div>
-
         
-
-
-        
-  <div class="comments" id="comments">
-    
-      <div class="ds-thread" data-thread-key="2015/12/05/Restudy-cpp/"
-           data-title="重拾 c++ " data-url="http://monotone.github.io/2015/12/05/Restudy-cpp/">
-      </div>
-    
-  </div>
-
-
-      </div>
-
-      
-        
+          
   
   <div class="sidebar-toggle">
     <div class="sidebar-toggle-line-wrap">
@@ -350,338 +473,290 @@
   </div>
 
   <aside id="sidebar" class="sidebar">
+    
     <div class="sidebar-inner">
 
       
 
       
         <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
             文章目录
           </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
             站点概览
           </li>
         </ul>
       
 
-      <section class="site-overview sidebar-panel ">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <img class="site-author-image" src="https://avatars0.githubusercontent.com/u/4949550?v=3&s=460" alt="单调" itemprop="image"/>
-          <p class="site-author-name" itemprop="name">单调</p>
-        </div>
-        <p class="site-description motion-element" itemprop="description">谁能够划船不用浆</p>
-        <nav class="site-state motion-element">
-          <div class="site-state-item site-state-posts">
-            <a href="/archives">
-              <span class="site-state-item-count">7</span>
-              <span class="site-state-item-name">日志</span>
-            </a>
-          </div>
-
-          <div class="site-state-item site-state-categories">
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <span class="site-state-item-count">0</span>
-              <span class="site-state-item-name">分类</span>
-              
-          </div>
-
-          <div class="site-state-item site-state-tags">
+              <img class="site-author-image" itemprop="image"
+                src="/avatar.gif"
+                alt="单调" />
             
-              <span class="site-state-item-count">12</span>
-              <span class="site-state-item-name">标签</span>
-              
+              <p class="site-author-name" itemprop="name">单调</p>
+              <p class="site-description motion-element" itemprop="description">谁能够划船不用浆</p>
           </div>
 
-        </nav>
+          <nav class="site-state motion-element">
 
-        
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
 
-        <div class="links-of-author motion-element">
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
           
-        </div>
 
-        
-        
+          <div class="links-of-author motion-element">
+            
+          </div>
 
-        <div class="links-of-author motion-element">
           
-        </div>
+          
 
+          
+          
+
+          
+
+        </div>
       </section>
 
       
+      <!--noindex-->
         <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc-indicator-top post-toc-indicator">
-            <i class="fa fa-angle-double-up"></i>
-          </div>
           <div class="post-toc">
+
             
               
             
+
             
               <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#强枚举类型"><span class="nav-number">1.</span> <span class="nav-text">强枚举类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#std-array"><span class="nav-number">2.</span> <span class="nav-text">std::array</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于区间的-for-循环"><span class="nav-number">3.</span> <span class="nav-text">基于区间的 for 循环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#替代的函数语法"><span class="nav-number">4.</span> <span class="nav-text">替代的函数语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关键字-auto-和-decltype"><span class="nav-number">5.</span> <span class="nav-text">关键字 auto 和 decltype</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#智能指针"><span class="nav-number">6.</span> <span class="nav-text">智能指针</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#unique-ptr"><span class="nav-number">6.0.1.</span> <span class="nav-text">unique_ptr</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#shared-ptr"><span class="nav-number">6.0.2.</span> <span class="nav-text">shared_ptr</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#weak-ptr"><span class="nav-number">6.0.3.</span> <span class="nav-text">weak_ptr</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对-std-string-的几点补充"><span class="nav-number">7.</span> <span class="nav-text">对 std::string 的几点补充</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#std-string-字面量"><span class="nav-number">7.0.1.</span> <span class="nav-text">std::string 字面量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#类型转换函数"><span class="nav-number">7.0.2.</span> <span class="nav-text">类型转换函数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#原始字符串字面量"><span class="nav-number">7.0.3.</span> <span class="nav-text">原始字符串字面量</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-delete-标记函数不可用"><span class="nav-number">8.</span> <span class="nav-text">使用 delete 标记函数不可用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在类中使用引用成员变量"><span class="nav-number">9.</span> <span class="nav-text">在类中使用引用成员变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mutable-的使用"><span class="nav-number">10.</span> <span class="nav-text">mutable 的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#typedef的另一种实现方法"><span class="nav-number">11.</span> <span class="nav-text">typedef的另一种实现方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-final-来禁用继承和重写"><span class="nav-number">12.</span> <span class="nav-text">使用 final 来禁用继承和重写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重写基类的方法一定要加上-override"><span class="nav-number">13.</span> <span class="nav-text">重写基类的方法一定要加上 override</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用基类的构造函数构造派生类对象"><span class="nav-number">14.</span> <span class="nav-text">使用基类的构造函数构造派生类对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重写具有默认参数的函数，要注意默认参数不会被继承"><span class="nav-number">15.</span> <span class="nav-text">重写具有默认参数的函数，要注意默认参数不会被继承</span></a></li></ol></div>
             
-          </div>
-          <div class="post-toc-indicator-bottom post-toc-indicator">
-            <i class="fa fa-angle-double-down"></i>
+
           </div>
         </section>
+      <!--/noindex-->
+      
+
       
 
     </div>
   </aside>
 
 
-      
+        
+      </div>
     </main>
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright" >
-  
-  &copy; 
-  <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
   <span class="with-love">
-    <i class="icon-next-heart fa fa-heart"></i>
+    <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">单调</span>
-</div>
 
-<div class="powered-by">
-  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
-</div>
-
-<div class="theme-info">
-  主题 -
-  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Mist
-  </a>
+  
 </div>
 
 
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
 
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
       </div>
     </footer>
 
-    <div class="back-to-top"></div>
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
   </div>
 
-  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
-
-  
   
 
-  
-    
-
-  
-    
-  
-
-  <script type="text/javascript">
-    var duoshuoQuery = {short_name:"dandiao"};
-    (function() {
-      var ds = document.createElement('script');
-      ds.type = 'text/javascript';ds.async = true;
-      ds.id = 'duoshuo-script';
-      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-      ds.charset = 'UTF-8';
-      (document.getElementsByTagName('head')[0]
-      || document.getElementsByTagName('body')[0]).appendChild(ds);
-    })();
-  </script>
-    
-     
-
-
-    
-  
-
-  
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
-  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.2"></script>
-
-
-  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.2"></script>
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
-<script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
-
-<script type="text/javascript" src="/js/motion.js?v=0.4.5.2" id="motion.global"></script>
-
-
-  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-
-  
-  
-<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.2" id="bootstrap.scrollspy.custom"></script>
-
-
-<script type="text/javascript" id="sidebar.toc.highlight">
-  $(document).ready(function () {
-    var tocSelector = '.post-toc';
-    var $tocSelector = $(tocSelector);
-    var activeCurrentSelector = '.active-current';
-
-    $tocSelector
-      .on('activate.bs.scrollspy', function () {
-        var $currentActiveElement = $(tocSelector + ' .active').last();
-
-        removeCurrentActiveClass();
-        $currentActiveElement.addClass('active-current');
-
-        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
-      })
-      .on('clear.bs.scrollspy', function () {
-        removeCurrentActiveClass();
-      });
-
-    function removeCurrentActiveClass () {
-      $(tocSelector + ' ' + activeCurrentSelector)
-        .removeClass(activeCurrentSelector.substring(1));
-    }
-
-    function processTOC () {
-      getTOCMaxHeight();
-      toggleTOCOverflowIndicators();
-    }
-
-    function getTOCMaxHeight () {
-      var height = $('.sidebar').height() -
-                   $tocSelector.position().top -
-                   $('.post-toc-indicator-bottom').height();
-
-      $tocSelector.css('height', height);
-
-      return height;
-    }
-
-    function toggleTOCOverflowIndicators () {
-      tocOverflowIndicator(
-        '.post-toc-indicator-top',
-        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
-      );
-
-      tocOverflowIndicator(
-        '.post-toc-indicator-bottom',
-        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
-      )
-    }
-
-    $(document).on('sidebar.motion.complete', function () {
-      processTOC();
-    });
-
-    $('body').scrollspy({ target: tocSelector });
-    $(window).on('resize', function () {
-      if ( $('.sidebar').hasClass('sidebar-active') ) {
-        processTOC();
-      }
-    });
-
-    onScroll($tocSelector);
-
-    function onScroll (element) {
-      element.on('mousewheel DOMMouseScroll', function (event) {
-          var oe = event.originalEvent;
-          var delta = oe.wheelDelta || -oe.detail;
-
-          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
-          event.preventDefault();
-
-          toggleTOCOverflowIndicators();
-      });
-    }
-
-    function tocOverflowIndicator (indicator, action) {
-      var $indicator = $(indicator);
-      var opacity = action === 'show' ? 1 : 0;
-      $indicator.velocity ?
-        $indicator.velocity('stop').velocity({
-          opacity: opacity
-        }, { duration: 100 }) :
-        $indicator.stop().animate({
-          opacity: opacity
-        }, 100);
-    }
-
-  });
-</script>
-
-<script type="text/javascript" id="sidebar.nav">
-  $(document).ready(function () {
-    var html = $('html');
-    var TAB_ANIMATE_DURATION = 200;
-    var hasVelocity = $.isFunction(html.velocity);
-
-    $('.sidebar-nav li').on('click', function () {
-      var item = $(this);
-      var activeTabClassName = 'sidebar-nav-active';
-      var activePanelClassName = 'sidebar-panel-active';
-      if (item.hasClass(activeTabClassName)) {
-        return;
-      }
-
-      var currentTarget = $('.' + activePanelClassName);
-      var target = $('.' + item.data('target'));
-
-      hasVelocity ?
-        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
-          target
-            .velocity('stop')
-            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
-            .addClass(activePanelClassName);
-        }) :
-        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
-          currentTarget.hide();
-          target
-            .stop()
-            .css({'opacity': 0, 'display': 'block'})
-            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
-              currentTarget.removeClass(activePanelClassName);
-              target.addClass(activePanelClassName);
-            });
-        });
-
-      item.siblings().removeClass(activeTabClassName);
-      item.addClass(activeTabClassName);
-    });
-
-    $('.post-toc a').on('click', function (e) {
-      e.preventDefault();
-      var targetSelector = escapeSelector(this.getAttribute('href'));
-      var offset = $(targetSelector).offset().top;
-      hasVelocity ?
-        html.velocity('stop').velocity('scroll', {
-          offset: offset  + 'px',
-          mobileHA: false
-        }) :
-        $('html, body').stop().animate({
-          scrollTop: offset
-        }, 500);
-    });
-
-    // Expand sidebar on post detail page by default, when post has a toc.
-    motionMiddleWares.sidebar = function () {
-      var $tocContent = $('.post-toc-content');
-      if (CONFIG.sidebar === 'post') {
-        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
-          displaySidebar();
-        }
-      }
-    };
-  });
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
 </script>
 
 
 
-  <script type="text/javascript" src="/js/bootstrap.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
 
   
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
   
 
 </body>

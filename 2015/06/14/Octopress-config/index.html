@@ -1,9 +1,22 @@
-<!doctype html>
-<html class="theme-next   use-motion ">
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
 
 
 
@@ -21,21 +34,13 @@
 
 
 
-  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
 
 
 
 
-  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
-
-
-
-<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
-
-<link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
-
-
-  <meta name="keywords" content="博客,Octopress设置," />
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
@@ -43,8 +48,35 @@
 
 
 
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
 
-  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.2" />
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/favicons/safari-pinned-tab.svg?v=5.1.3" color="#222">
+
+
+  <link rel="manifest" href="/favicons/manifest.json">
+
+
+  <meta name="msapplication-config" content="/favicons/browserconfig.xml" />
+
+
+
+  <meta name="keywords" content="Octopress设置,博客," />
+
+
+
+
 
 
 
@@ -52,7 +84,7 @@
 
 
 <meta name="description" content="在GitHub上搜索关键字octopress theme，然后按照星数排序，前面几个我都试过了，特别是greyshade主题，我是比较喜欢的，但是主题这东西除了考虑好看之外，还要考虑适不适合添加其他的东西，比如文章分类啊，标签云啊，近期文章啊，热评文章啊等等（这些是我在折腾了好几个主题后才考虑到的）。就是因为前面没考虑到这些，所以折腾了好久之后又更换主题又重新设置（我也是醉了）。最终还是绝得默认的">
-<meta name="keywords" content="博客,Octopress设置">
+<meta name="keywords" content="Octopress设置,博客">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Octopress 设置">
 <meta property="og:url" content="http://monotone.github.io/2015/06/14/Octopress-config/index.html">
@@ -66,29 +98,42 @@
 
 
 
-<script type="text/javascript" id="hexo.configuration">
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
   var CONFIG = {
+    root: '/',
     scheme: 'Mist',
-    sidebar: 'hide',
-    motion: true
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
   };
 </script>
 
-  <title> Octopress 设置 | 好好单调 </title>
-</head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
-  <!--[if lte IE 8]>
-  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
-    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
-      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
-           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
-           style='margin-left:auto;margin-right:auto;display: block;'/>
-    </a>
-  </div>
-<![endif]-->
+  <link rel="canonical" href="http://monotone.github.io/2015/06/14/Octopress-config/"/>
+
+
+
+
+
+  <title>Octopress 设置 | 好好单调</title>
   
+
+
 
 
 
@@ -96,7 +141,7 @@
     var _hmt = _hmt || [];
     (function() {
       var hm = document.createElement("script");
-      hm.src = "//hm.baidu.com/hm.js?27e8a96f4afcc9eb2cc7546ebed1";
+      hm.src = "https://hm.baidu.com/hm.js?27e8a96f4afcc9eb2cc7546ebed653f1";
       var s = document.getElementsByTagName("script")[0];
       s.parentNode.insertBefore(hm, s);
     })();
@@ -105,52 +150,95 @@
 
 
 
-  <div class="container one-column page-post-detail">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-meta ">
-  
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
 
-  <div class="custom-logo-site-title">
-    <a href="/"  class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <span class="site-title">好好单调</span>
-      <span class="logo-line-after"><i></i></span>
-    </a>
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好单调</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">一个80末码农的自留地</p>
+      
   </div>
-  <p class="site-subtitle">一个80末码农的自留地</p>
-</div>
 
-<div class="site-nav-toggle">
-  <button>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-  </button>
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
 </div>
 
 <nav class="site-nav">
   
 
   
-    <ul id="menu" class="menu ">
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
       
         
         <li class="menu-item menu-item-archives">
-          <a href="/archives" rel="section">
+          <a href="/archives/" rel="section">
             
-              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
             归档
           </a>
         </li>
       
         
-        <li class="menu-item menu-item-about">
-          <a href="/about" rel="section">
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
             
-              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
             
             关于
           </a>
@@ -158,67 +246,87 @@
       
 
       
-      
     </ul>
   
 
   
 </nav>
 
+
+
  </div>
     </header>
 
     <main id="main" class="main">
       <div class="main-inner">
-        <div id="content" class="content">
-          
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
 
   <div id="posts" class="posts-expand">
     
 
   
-  
 
   
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2015/06/14/Octopress-config/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
 
     
       <header class="post-header">
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                Octopress 设置
-              
-            
-          </h1>
+          <h1 class="post-title" itemprop="name headline">Octopress 设置</h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            发表于
-            <time itemprop="dateCreated" datetime="2015-06-14T20:21:05+08:00" content="2015-06-14">
-              2015-06-14
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-06-14T20:21:05+08:00">
+                2015-06-14
+              </time>
+            
+
+            
+
+            
           </span>
 
           
 
           
             
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2015/06/14/Octopress-config/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/06/14/Octopress-config/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
+          
+
+          
+          
+
+          
+
           
 
           
@@ -227,14 +335,16 @@
       </header>
     
 
-
-    <div class="post-body">
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
       
 
       
-        <span itemprop="articleBody"><p>在GitHub上搜索关键字<code>octopress theme</code>，然后按照星数排序，前面几个我都试过了，特别是<a href="https://github.com/shashankmehta/greyshade" target="_blank" rel="external">greyshade</a>主题，我是比较喜欢的，但是主题这东西除了考虑好看之外，还要考虑适不适合添加其他的东西，比如文章分类啊，标签云啊，近期文章啊，热评文章啊等等（这些是我在折腾了好几个主题后才考虑到的）。就是因为前面没考虑到这些，所以折腾了好久之后又更换主题又重新设置（我也是醉了）。最终还是绝得默认的经典主题比较适合加这些东西。<br><a id="more"></a></p>
+        <p>在GitHub上搜索关键字<code>octopress theme</code>，然后按照星数排序，前面几个我都试过了，特别是<a href="https://github.com/shashankmehta/greyshade" target="_blank" rel="external">greyshade</a>主题，我是比较喜欢的，但是主题这东西除了考虑好看之外，还要考虑适不适合添加其他的东西，比如文章分类啊，标签云啊，近期文章啊，热评文章啊等等（这些是我在折腾了好几个主题后才考虑到的）。就是因为前面没考虑到这些，所以折腾了好久之后又更换主题又重新设置（我也是醉了）。最终还是绝得默认的经典主题比较适合加这些东西。<br><a id="more"></a></p>
 <h3 id="加速一下"><a href="#加速一下" class="headerlink" title="加速一下"></a>加速一下</h3><p>默认主题里面有使用google字体什么的，所以加载的时候比较慢，参照链接：<a href="http://droidyue.com/blog/2014/06/22/fix-octopress-slow-loading-speed-issue-in-china-mainland/" target="_blank" rel="external">解决Octopress访问慢的问题</a>，<strong>注意这里解决Google Analytics使用的是博主的（我目前不太懂这些是什么玩意，所以先用着博主的了）</strong>。<br>这里顺便记录下<a href="http://libs.useso.com" target="_blank" rel="external">360网站卫士常用前端公共库CDN服务</a>，应该类似于吧被墙了的东西放到墙内来让大家使用吧。  </p>
 <h3 id="博客自定义修改"><a href="#博客自定义修改" class="headerlink" title="博客自定义修改"></a>博客自定义修改</h3><p>关于这部分，我就不多写了，直接提供一个链接吧，因为这位博主写的相当详细，就我这不懂ruby和html以及css的都能照着做。后面就只补充这里没有写过的了。<br><a href="http://shengmingzhiqing.com/blog/octopress-lean-modification-1.html/" target="_blank" rel="external">http://shengmingzhiqing.com/blog/octopress-lean-modification-1.html/</a>  </p>
 <p><strong>这里进行一下纠错：</strong>  </p>
@@ -250,19 +360,32 @@
 <p>其实还可以增加标签、关键字、和描述：<br>tags: [Octopress设置, 博客]<br>keywords: octopress设置, octopress加速<br>description: 介绍设置octopress</p>
 <p>这里可以在<code>rakefile</code>的<code>post.puts &quot;categories: []&quot;</code>后面增加如下三行即可自动在新生成的博客中增加上面的所有的关键字。<br>post.puts “tags: []”<br>post.puts “keywords: “<br>post.puts “description: “</p>
 <p>当然其实对于博客首页，也可以添加描述和关键字，在<code>source/index.html</code>顶部仿照如上方法增加即可。</p>
-</span>
+
       
     </div>
+    
+    
+    
+
+    
+
+    
+
+    
 
     <footer class="post-footer">
       
         <div class="post-tags">
           
-            <a href="/tags/博客/" rel="tag">#博客</a>
+            <a href="/tags/Octopress设置/" rel="tag"># Octopress设置</a>
           
-            <a href="/tags/Octopress设置/" rel="tag">#Octopress设置</a>
+            <a href="/tags/博客/" rel="tag"># 博客</a>
           
         </div>
+      
+
+      
+      
       
 
       
@@ -274,6 +397,8 @@
               </a>
             
           </div>
+
+          <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
@@ -288,6 +413,10 @@
       
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -298,25 +427,19 @@
   </div>
 
 
+          </div>
+          
+
+
+          
+
+  
+
+
+
         </div>
-
         
-
-
-        
-  <div class="comments" id="comments">
-    
-      <div class="ds-thread" data-thread-key="2015/06/14/Octopress-config/"
-           data-title="Octopress 设置" data-url="http://monotone.github.io/2015/06/14/Octopress-config/">
-      </div>
-    
-  </div>
-
-
-      </div>
-
-      
-        
+          
   
   <div class="sidebar-toggle">
     <div class="sidebar-toggle-line-wrap">
@@ -327,338 +450,290 @@
   </div>
 
   <aside id="sidebar" class="sidebar">
+    
     <div class="sidebar-inner">
 
       
 
       
         <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
             文章目录
           </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
             站点概览
           </li>
         </ul>
       
 
-      <section class="site-overview sidebar-panel ">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <img class="site-author-image" src="https://avatars0.githubusercontent.com/u/4949550?v=3&s=460" alt="单调" itemprop="image"/>
-          <p class="site-author-name" itemprop="name">单调</p>
-        </div>
-        <p class="site-description motion-element" itemprop="description">谁能够划船不用浆</p>
-        <nav class="site-state motion-element">
-          <div class="site-state-item site-state-posts">
-            <a href="/archives">
-              <span class="site-state-item-count">7</span>
-              <span class="site-state-item-name">日志</span>
-            </a>
-          </div>
-
-          <div class="site-state-item site-state-categories">
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <span class="site-state-item-count">0</span>
-              <span class="site-state-item-name">分类</span>
-              
-          </div>
-
-          <div class="site-state-item site-state-tags">
+              <img class="site-author-image" itemprop="image"
+                src="/avatar.gif"
+                alt="单调" />
             
-              <span class="site-state-item-count">12</span>
-              <span class="site-state-item-name">标签</span>
-              
+              <p class="site-author-name" itemprop="name">单调</p>
+              <p class="site-description motion-element" itemprop="description">谁能够划船不用浆</p>
           </div>
 
-        </nav>
+          <nav class="site-state motion-element">
 
-        
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
 
-        <div class="links-of-author motion-element">
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
           
-        </div>
 
-        
-        
+          <div class="links-of-author motion-element">
+            
+          </div>
 
-        <div class="links-of-author motion-element">
           
-        </div>
+          
 
+          
+          
+
+          
+
+        </div>
       </section>
 
       
+      <!--noindex-->
         <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc-indicator-top post-toc-indicator">
-            <i class="fa fa-angle-double-up"></i>
-          </div>
           <div class="post-toc">
+
             
               
             
+
             
               <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#加速一下"><span class="nav-number">1.</span> <span class="nav-text">加速一下</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#博客自定义修改"><span class="nav-number">2.</span> <span class="nav-text">博客自定义修改</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#增加返回顶部按钮"><span class="nav-number">3.</span> <span class="nav-text">增加返回顶部按钮</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#增加标签、关键字、描述"><span class="nav-number">4.</span> <span class="nav-text">增加标签、关键字、描述</span></a></li></ol></div>
             
-          </div>
-          <div class="post-toc-indicator-bottom post-toc-indicator">
-            <i class="fa fa-angle-double-down"></i>
+
           </div>
         </section>
+      <!--/noindex-->
+      
+
       
 
     </div>
   </aside>
 
 
-      
+        
+      </div>
     </main>
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright" >
-  
-  &copy; 
-  <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
   <span class="with-love">
-    <i class="icon-next-heart fa fa-heart"></i>
+    <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">单调</span>
-</div>
 
-<div class="powered-by">
-  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
-</div>
-
-<div class="theme-info">
-  主题 -
-  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Mist
-  </a>
+  
 </div>
 
 
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
 
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
       </div>
     </footer>
 
-    <div class="back-to-top"></div>
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
   </div>
 
-  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
-
-  
   
 
-  
-    
-
-  
-    
-  
-
-  <script type="text/javascript">
-    var duoshuoQuery = {short_name:"dandiao"};
-    (function() {
-      var ds = document.createElement('script');
-      ds.type = 'text/javascript';ds.async = true;
-      ds.id = 'duoshuo-script';
-      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-      ds.charset = 'UTF-8';
-      (document.getElementsByTagName('head')[0]
-      || document.getElementsByTagName('body')[0]).appendChild(ds);
-    })();
-  </script>
-    
-     
-
-
-    
-  
-
-  
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
-  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.2"></script>
-
-
-  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.2"></script>
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
-<script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
-
-<script type="text/javascript" src="/js/motion.js?v=0.4.5.2" id="motion.global"></script>
-
-
-  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-
-  
-  
-<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.2" id="bootstrap.scrollspy.custom"></script>
-
-
-<script type="text/javascript" id="sidebar.toc.highlight">
-  $(document).ready(function () {
-    var tocSelector = '.post-toc';
-    var $tocSelector = $(tocSelector);
-    var activeCurrentSelector = '.active-current';
-
-    $tocSelector
-      .on('activate.bs.scrollspy', function () {
-        var $currentActiveElement = $(tocSelector + ' .active').last();
-
-        removeCurrentActiveClass();
-        $currentActiveElement.addClass('active-current');
-
-        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
-      })
-      .on('clear.bs.scrollspy', function () {
-        removeCurrentActiveClass();
-      });
-
-    function removeCurrentActiveClass () {
-      $(tocSelector + ' ' + activeCurrentSelector)
-        .removeClass(activeCurrentSelector.substring(1));
-    }
-
-    function processTOC () {
-      getTOCMaxHeight();
-      toggleTOCOverflowIndicators();
-    }
-
-    function getTOCMaxHeight () {
-      var height = $('.sidebar').height() -
-                   $tocSelector.position().top -
-                   $('.post-toc-indicator-bottom').height();
-
-      $tocSelector.css('height', height);
-
-      return height;
-    }
-
-    function toggleTOCOverflowIndicators () {
-      tocOverflowIndicator(
-        '.post-toc-indicator-top',
-        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
-      );
-
-      tocOverflowIndicator(
-        '.post-toc-indicator-bottom',
-        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
-      )
-    }
-
-    $(document).on('sidebar.motion.complete', function () {
-      processTOC();
-    });
-
-    $('body').scrollspy({ target: tocSelector });
-    $(window).on('resize', function () {
-      if ( $('.sidebar').hasClass('sidebar-active') ) {
-        processTOC();
-      }
-    });
-
-    onScroll($tocSelector);
-
-    function onScroll (element) {
-      element.on('mousewheel DOMMouseScroll', function (event) {
-          var oe = event.originalEvent;
-          var delta = oe.wheelDelta || -oe.detail;
-
-          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
-          event.preventDefault();
-
-          toggleTOCOverflowIndicators();
-      });
-    }
-
-    function tocOverflowIndicator (indicator, action) {
-      var $indicator = $(indicator);
-      var opacity = action === 'show' ? 1 : 0;
-      $indicator.velocity ?
-        $indicator.velocity('stop').velocity({
-          opacity: opacity
-        }, { duration: 100 }) :
-        $indicator.stop().animate({
-          opacity: opacity
-        }, 100);
-    }
-
-  });
-</script>
-
-<script type="text/javascript" id="sidebar.nav">
-  $(document).ready(function () {
-    var html = $('html');
-    var TAB_ANIMATE_DURATION = 200;
-    var hasVelocity = $.isFunction(html.velocity);
-
-    $('.sidebar-nav li').on('click', function () {
-      var item = $(this);
-      var activeTabClassName = 'sidebar-nav-active';
-      var activePanelClassName = 'sidebar-panel-active';
-      if (item.hasClass(activeTabClassName)) {
-        return;
-      }
-
-      var currentTarget = $('.' + activePanelClassName);
-      var target = $('.' + item.data('target'));
-
-      hasVelocity ?
-        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
-          target
-            .velocity('stop')
-            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
-            .addClass(activePanelClassName);
-        }) :
-        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
-          currentTarget.hide();
-          target
-            .stop()
-            .css({'opacity': 0, 'display': 'block'})
-            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
-              currentTarget.removeClass(activePanelClassName);
-              target.addClass(activePanelClassName);
-            });
-        });
-
-      item.siblings().removeClass(activeTabClassName);
-      item.addClass(activeTabClassName);
-    });
-
-    $('.post-toc a').on('click', function (e) {
-      e.preventDefault();
-      var targetSelector = escapeSelector(this.getAttribute('href'));
-      var offset = $(targetSelector).offset().top;
-      hasVelocity ?
-        html.velocity('stop').velocity('scroll', {
-          offset: offset  + 'px',
-          mobileHA: false
-        }) :
-        $('html, body').stop().animate({
-          scrollTop: offset
-        }, 500);
-    });
-
-    // Expand sidebar on post detail page by default, when post has a toc.
-    motionMiddleWares.sidebar = function () {
-      var $tocContent = $('.post-toc-content');
-      if (CONFIG.sidebar === 'post') {
-        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
-          displaySidebar();
-        }
-      }
-    };
-  });
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
 </script>
 
 
 
-  <script type="text/javascript" src="/js/bootstrap.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
 
   
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
   
 
 </body>
