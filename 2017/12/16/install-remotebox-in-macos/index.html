@@ -72,7 +72,7 @@
 
 
 
-  <meta name="keywords" content="Octopress,ghost," />
+  <meta name="keywords" content="macos,remotebox," />
 
 
 
@@ -83,18 +83,18 @@
 
 
 
-<meta name="description" content="上次在GitHub上搭建好Octopress之后，我就去尝试为Octopress增加其他设置，比如评论系统等。了解到这一切的前提是先选择好一个主题，因为后面的这些设置都是根据主题来的，一旦主题发生更换，这些设置就又需要重新设置。   问题在挑选主题的过程中，似乎有点少，然后同时也发现了一个博客平台叫Ghost的（这货不是操作系统镜像吗？）。 初步了解了之后，发现它比较新，并且能在线直接用Markd">
-<meta name="keywords" content="Octopress,ghost">
+<meta name="description" content="要在centos命令行系统中安装一个特定系统的虚拟机来使用，之前没通过命令行装过，又赶时间要用，所以就想抄捷径，弄个远程GUI管理工具来用。就搜索到了remotebox，这里记下来。">
+<meta name="keywords" content="macos,remotebox">
 <meta property="og:type" content="article">
-<meta property="og:title" content="选择 Octopress">
-<meta property="og:url" content="http://monotone.github.io/2015/06/14/Choose-Octopress /index.html">
+<meta property="og:title" content="macos下安装remotebox">
+<meta property="og:url" content="http://monotone.github.io/2017/12/16/install-remotebox-in-macos/index.html">
 <meta property="og:site_name" content="好好单调">
-<meta property="og:description" content="上次在GitHub上搭建好Octopress之后，我就去尝试为Octopress增加其他设置，比如评论系统等。了解到这一切的前提是先选择好一个主题，因为后面的这些设置都是根据主题来的，一旦主题发生更换，这些设置就又需要重新设置。   问题在挑选主题的过程中，似乎有点少，然后同时也发现了一个博客平台叫Ghost的（这货不是操作系统镜像吗？）。 初步了解了之后，发现它比较新，并且能在线直接用Markd">
+<meta property="og:description" content="要在centos命令行系统中安装一个特定系统的虚拟机来使用，之前没通过命令行装过，又赶时间要用，所以就想抄捷径，弄个远程GUI管理工具来用。就搜索到了remotebox，这里记下来。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-12-16T11:43:34.620Z">
+<meta property="og:updated_time" content="2017-12-16T12:45:03.151Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="选择 Octopress">
-<meta name="twitter:description" content="上次在GitHub上搭建好Octopress之后，我就去尝试为Octopress增加其他设置，比如评论系统等。了解到这一切的前提是先选择好一个主题，因为后面的这些设置都是根据主题来的，一旦主题发生更换，这些设置就又需要重新设置。   问题在挑选主题的过程中，似乎有点少，然后同时也发现了一个博客平台叫Ghost的（这货不是操作系统镜像吗？）。 初步了解了之后，发现它比较新，并且能在线直接用Markd">
+<meta name="twitter:title" content="macos下安装remotebox">
+<meta name="twitter:description" content="要在centos命令行系统中安装一个特定系统的虚拟机来使用，之前没通过命令行装过，又赶时间要用，所以就想抄捷径，弄个远程GUI管理工具来用。就搜索到了remotebox，这里记下来。">
 
 
 
@@ -124,13 +124,13 @@
 
 
 
-  <link rel="canonical" href="http://monotone.github.io/2015/06/14/Choose-Octopress /"/>
+  <link rel="canonical" href="http://monotone.github.io/2017/12/16/install-remotebox-in-macos/"/>
 
 
 
 
 
-  <title>选择 Octopress | 好好单调</title>
+  <title>macos下安装remotebox | 好好单调</title>
   
 
 
@@ -286,7 +286,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2015/06/14/Choose-Octopress /">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2017/12/16/install-remotebox-in-macos/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="单调">
@@ -303,7 +303,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">选择 Octopress</h1>
+          <h1 class="post-title" itemprop="name headline">macos下安装remotebox</h1>
         
 
         <div class="post-meta">
@@ -315,8 +315,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-06-14T16:21:05+08:00">
-                2015-06-14
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-16T18:49:37+08:00">
+                2017-12-16
               </time>
             
 
@@ -380,15 +380,33 @@
       
 
       
-        <p>上次在GitHub上搭建好Octopress之后，我就去尝试为Octopress增加其他设置，比如评论系统等。了解到这一切的前提是先选择好一个主题，因为后面的这些设置都是根据主题来的，一旦主题发生更换，这些设置就又需要重新设置。  </p>
-<p>问题在挑选主题的过程中，似乎有点少，然后同时也发现了一个博客平台叫Ghost的（这货不是操作系统镜像吗？）。</p>
-<p>初步了解了之后，发现它比较新，并且能在线直接用Markdown编辑博客，还有一个我特别喜欢的功能，就是图片占位符，就是你在写的过程中可以先使用<code>![占位符描述]()</code>这种语法先占着图片的位置，然后最后只需要点击预览界面上的这个占位图，就会弹出一个对话框然你选择图片上传到博客平台上去，同时杠杠空白的<code>()</code>中的内容就变成了类似于本地的图片文件目录。想了解的考验去体验一下，我个人非常喜欢这个功能。<br><a id="more"></a></p>
-<h3 id="我在Openshift尝试过搭建Ghost博客"><a href="#我在Openshift尝试过搭建Ghost博客" class="headerlink" title="我在Openshift尝试过搭建Ghost博客"></a>我在Openshift尝试过搭建Ghost博客</h3><p>问题是，这个基于Node.js博客平台不是静态博客，需要数据库，加之我之前买的虚拟主机是cPanel的，它不支持。网上能找到可以免费使用的支持Node.js的免费平台也不多，再除去被墙的，我试过的就只有HeroKu和Openshift（好像还有个一年免费试用的AmazonEs什么的）。HeroKu注册后总是登录不上（而且Ghost官方也说了HeroKu可能会丢失图片什么的），所以就没试它了。</p>
-<p>Openshift相对简单点，翻墙注册后，去<a href="https://hub.openshift.com" target="_blank" rel="external">hub.openshift.com</a>选择ghost，可以一键快速部署出一个ghost博客，然后根据提示一步一步操作就行。</p>
-<p>需要注意的是在绑定自己的域名时，更改config.js文件中，需要更改production url的时候，需要根据你自己选的数据库类型来做更改（我在这里试了好多次总是失败，然后每次去刷新博客的时候总是出现各种错误，不知道是不是因为openshift被墙了的缘故）。</p>
-<p>后面又去设置ghost博客的一些设置，发现不懂javascript，去弄着这些总是提心吊胆的，也没搜到可以实现文章分类的设置方式。最终就不了了之了。最终效果也就这样了<a href="http://ghost-dandiao.rhcloud.com" target="_blank" rel="external">好好单调</a>。</p>
-<p>Openshift提供的免费空间只有1G，我也不知道够不够用，总之有种被限制的感觉，更不想去付费什么的，加之访问超慢，种种缘故，我也不想弄到Openshift上了。</p>
-<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>嗯，最后在折腾了一个周末之后，我又折腾回来了，总之相对而言，octopress我还算知道一些东西了，虽然还是很喜欢ghost那个图片占位的功能。Octopress时静态的，我可以存储在本地，不需要多余的环境，又和Github同步着，也足够放心。嗯，下一篇就着重记录下octopress的设置吧。</p>
+        <p>要在centos命令行系统中安装一个特定系统的虚拟机来使用，之前没通过命令行装过，又赶时间要用，所以就想抄捷径，弄个远程GUI管理工具来用。就搜索到了remotebox，这里记下来。<br><a id="more"></a></p>
+<p>不过事实证明，走捷径不知道原理，出了大问题真的难以解决。</p>
+<h2 id="安装VirtualBox"><a href="#安装VirtualBox" class="headerlink" title="安装VirtualBox"></a>安装VirtualBox</h2><p>参考官方文档：</p>
+<pre><code>https://www.virtualbox.org/wiki/Linux_Downloads
+</code></pre><p>配置yum源：</p>
+<p>vim /etc/yum.repos.d/virtualbox.repo</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="section">[virtualbox]</span></div><div class="line"><span class="attr">name</span>=Oracle Linux / RHEL / CentOS-<span class="variable">$releasever</span> / <span class="variable">$basearch</span> - VirtualBox</div><div class="line"><span class="attr">baseurl</span>=http://download.virtualbox.org/virtualbox/rpm/el/<span class="variable">$releasever</span>/<span class="variable">$basearch</span></div><div class="line"><span class="attr">enabled</span>=<span class="number">1</span></div><div class="line"><span class="attr">gpgcheck</span>=<span class="number">1</span></div><div class="line"><span class="attr">repo_gpgcheck</span>=<span class="number">1</span></div><div class="line"><span class="attr">gpgkey</span>=https://www.virtualbox.org/download/oracle_vbox.asc</div></pre></td></tr></table></figure>
+<p>然后用yum直接安装即可：</p>
+<p>yum install VirtualBox-5.2</p>
+<h3 id="安装扩展包"><a href="#安装扩展包" class="headerlink" title="安装扩展包"></a>安装扩展包</h3><figure class="highlight subunit"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">wget http://download.virtualbox.org/virtualbox/5.2.0/Oracle_VM_VirtualBox_Extension_Pack<span class="string">-5</span>.2.0<span class="string">-118431</span>.vbox-extpack</div><div class="line"></div><div class="line">VBoxManage extpack install Oracle_VM_VirtualBox_Extension_Pack<span class="string">-5</span>.2.0<span class="string">-118431</span>.vbox-extpack</div></pre></td></tr></table></figure>
+<h2 id="配置好VirtualBox"><a href="#配置好VirtualBox" class="headerlink" title="配置好VirtualBox"></a>配置好VirtualBox</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">/sbin/vboxconfig</div><div class="line">vboxdrv.sh: Stopping VirtualBox services.</div><div class="line">vboxdrv.sh: Building VirtualBox kernel modules.</div><div class="line">This<span class="built_in"> system </span>is currently <span class="keyword">not</span> <span class="builtin-name">set</span> up <span class="keyword">to</span> build kernel modules.</div><div class="line">Please install the Linux kernel <span class="string">"header"</span> files matching the current kernel</div><div class="line"><span class="keyword">for</span> adding new<span class="built_in"> hardware </span>support <span class="keyword">to</span> the system.</div><div class="line">The distribution packages containing the headers are probably:</div><div class="line">    kernel-devel kernel-devel-2.6.32-431.el6.x86_64</div><div class="line">This<span class="built_in"> system </span>is currently <span class="keyword">not</span> <span class="builtin-name">set</span> up <span class="keyword">to</span> build kernel modules.</div><div class="line">Please install the Linux kernel <span class="string">"header"</span> files matching the current kernel</div><div class="line"><span class="keyword">for</span> adding new<span class="built_in"> hardware </span>support <span class="keyword">to</span> the system.</div><div class="line">The distribution packages containing the headers are probably:</div><div class="line">    kernel-devel kernel-devel-2.6.32-431.el6.x86_64</div><div class="line"></div><div class="line">There were problems setting up VirtualBox.  <span class="keyword">To</span> re-start the set-up process, run</div><div class="line">  /sbin/vboxconfig</div><div class="line">as root.</div></pre></td></tr></table></figure>
+<p>出现如上错误: yum install kernel-devel-<code>uname -r</code>，如果实际安装的版本比当前的内核版本更新，建议直接更新内核吧。更容易解决。</p>
+<p>增加一个用户（不能用root，死活登录上的）,就算登录上了，创建虚拟机也会失败，因为默认虚拟磁盘是创建在用户主目录下的。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">useradd <span class="keyword">virtual</span>:root</div><div class="line">passwd <span class="keyword">virtual</span></div></pre></td></tr></table></figure>
+<p>编辑配置文件：<br><figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo vi <span class="regexp">/etc/</span><span class="keyword">default</span><span class="regexp">/virtualbox</span></div></pre></td></tr></table></figure></p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="attr">VBOXWEB_USER</span>=<span class="string">"virtual"</span></div><div class="line"><span class="attr">VBOXWEB_TIMEOUT</span>=<span class="number">0</span></div><div class="line"><span class="attr">VBOWWEB_LOGFILE</span>=<span class="string">"/var/log/vboxwebservice.log"</span></div><div class="line"><span class="attr">VBOXWEB_HOST</span>=<span class="string">"192.168.0.108"</span></div></pre></td></tr></table></figure>
+<p>确保日志文件存在并且属于对应的用户<br><figure class="highlight lasso"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo touch /<span class="built_in">var</span>/<span class="keyword">log</span>/vboxwebservice.<span class="keyword">log</span></div><div class="line">sudo chown virtual:root /<span class="built_in">var</span>/<span class="keyword">log</span>/vboxwebservice.<span class="keyword">log</span></div></pre></td></tr></table></figure></p>
+<p>到这里，就可以尝试去启动了</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo <span class="regexp">/etc/i</span>nit.d<span class="regexp">/vboxweb-service start</span></div></pre></td></tr></table></figure>
+<p>NOTE：</p>
+<p>貌似root用户启动的vboxwebsrv，远程使用root连接不上，我是另外弄了一个属于root组的用户远程登录的，就成功了。</p>
+<h2 id="从官网网站下载对应VirtualBox版本的RemoteBox包"><a href="#从官网网站下载对应VirtualBox版本的RemoteBox包" class="headerlink" title="从官网网站下载对应VirtualBox版本的RemoteBox包"></a>从官网网站下载对应VirtualBox版本的RemoteBox包</h2><p>下载地址为：<a href="http://remotebox.knobgoblin.org.uk/downloads.cgi" target="_blank" rel="external">http://remotebox.knobgoblin.org.uk/downloads.cgi</a> </p>
+<h2 id="安装RemoteBox"><a href="#安装RemoteBox" class="headerlink" title="安装RemoteBox"></a>安装RemoteBox</h2><h3 id="xquartz安装"><a href="#xquartz安装" class="headerlink" title="xquartz安装"></a>xquartz安装</h3><p>从 <a href="http://xquartz.macosforge.org/landing" target="_blank" rel="external">http://xquartz.macosforge.org/landing</a> 下载安装XQuartz</p>
+<h3 id="macports安装"><a href="#macports安装" class="headerlink" title="macports安装"></a>macports安装</h3><p>从<a href="http://www.macports.org下载系统的macports版本，注意确保安装了xcode的命令行工具集。我这里是直接下载二进制安装包安装。" target="_blank" rel="external">http://www.macports.org下载系统的macports版本，注意确保安装了xcode的命令行工具集。我这里是直接下载二进制安装包安装。</a></p>
+<p>安装完成后，如果运行port命令提示找不到，那么确保$PATH有 /opt/local/bin:/opt/local/sbin: 即可。</p>
+<p>然后执行<code>sudo port install perl5 p5-gtk2 p5-soap-lite freerdp</code></p>
+<h3 id="修改remotebox启动脚本"><a href="#修改remotebox启动脚本" class="headerlink" title="修改remotebox启动脚本"></a>修改remotebox启动脚本</h3><p>进入remotebox文件夹，修改remotebox脚本，第一行<code>#!/usr/bin/env perl</code>为<code>#!/opt/local/bin/perl5</code>。然后直接执行这儿脚本，没有问题的话remotebox算是安装完了。</p>
 
       
     </div>
@@ -406,9 +424,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Octopress/" rel="tag"># Octopress</a>
+            <a href="/tags/macos/" rel="tag"># macos</a>
           
-            <a href="/tags/ghost/" rel="tag"># ghost</a>
+            <a href="/tags/remotebox/" rel="tag"># remotebox</a>
           
         </div>
       
@@ -421,8 +439,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/05/30/Use-Octopress-and-Github-make-blog/" rel="next" title="菜鸟学习使用Octopress+GitHub搭建博客">
-                <i class="fa fa-chevron-left"></i> 菜鸟学习使用Octopress+GitHub搭建博客
+              <a href="/2016/02/29/share-wallpaper-for-programmer/" rel="next" title="分享给程序员的壁纸">
+                <i class="fa fa-chevron-left"></i> 分享给程序员的壁纸
               </a>
             
           </div>
@@ -431,8 +449,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/06/14/Octopress-config/" rel="prev" title="Octopress 设置">
-                Octopress 设置 <i class="fa fa-chevron-right"></i>
+              <a href="/2017/12/16/reverse-proxy-for-ssh-by-nginx/" rel="prev" title="nginx实现对ssh的反代">
+                nginx实现对ssh的反代 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -597,7 +615,7 @@ var jiathis_config={
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#我在Openshift尝试过搭建Ghost博客"><span class="nav-number">1.</span> <span class="nav-text">我在Openshift尝试过搭建Ghost博客</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最后"><span class="nav-number">2.</span> <span class="nav-text">最后</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装VirtualBox"><span class="nav-number">1.</span> <span class="nav-text">安装VirtualBox</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装扩展包"><span class="nav-number">1.1.</span> <span class="nav-text">安装扩展包</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置好VirtualBox"><span class="nav-number">2.</span> <span class="nav-text">配置好VirtualBox</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从官网网站下载对应VirtualBox版本的RemoteBox包"><span class="nav-number">3.</span> <span class="nav-text">从官网网站下载对应VirtualBox版本的RemoteBox包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装RemoteBox"><span class="nav-number">4.</span> <span class="nav-text">安装RemoteBox</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#xquartz安装"><span class="nav-number">4.1.</span> <span class="nav-text">xquartz安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#macports安装"><span class="nav-number">4.2.</span> <span class="nav-text">macports安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改remotebox启动脚本"><span class="nav-number">4.3.</span> <span class="nav-text">修改remotebox启动脚本</span></a></li></ol></li></ol></div>
             
 
           </div>
