@@ -83,18 +83,18 @@
 
 
 
-<meta name="description" content="最近从一个镜像安装的centos时间老是不对，所以从网上搜索组装出一个修改时区到中国，并定期自动同步时间的脚本。仅在centos下用过。 12345678#!/bin/shyum -y install ntpyes | cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtimeecho &quot;ZONE=\&quot;Asia/Shanghai\&quot;\nUTC=false">
+<meta name="description" content="最近从一个镜像安装的centos时间老是不对，所以从网上搜索组装出一个修改时区到中国，并定期自动同步时间的脚本。仅在centos下用过。">
 <meta name="keywords" content="linux,shell">
 <meta property="og:type" content="article">
 <meta property="og:title" content="cenos同步时间到中国">
 <meta property="og:url" content="http://monotone.github.io/2017/12/19/sync-time-to-china/index.html">
 <meta property="og:site_name" content="好好单调">
-<meta property="og:description" content="最近从一个镜像安装的centos时间老是不对，所以从网上搜索组装出一个修改时区到中国，并定期自动同步时间的脚本。仅在centos下用过。 12345678#!/bin/shyum -y install ntpyes | cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtimeecho &quot;ZONE=\&quot;Asia/Shanghai\&quot;\nUTC=false">
+<meta property="og:description" content="最近从一个镜像安装的centos时间老是不对，所以从网上搜索组装出一个修改时区到中国，并定期自动同步时间的脚本。仅在centos下用过。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-12-19T11:11:24.891Z">
+<meta property="og:updated_time" content="2017-12-28T12:49:41.576Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="cenos同步时间到中国">
-<meta name="twitter:description" content="最近从一个镜像安装的centos时间老是不对，所以从网上搜索组装出一个修改时区到中国，并定期自动同步时间的脚本。仅在centos下用过。 12345678#!/bin/shyum -y install ntpyes | cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtimeecho &quot;ZONE=\&quot;Asia/Shanghai\&quot;\nUTC=false">
+<meta name="twitter:description" content="最近从一个镜像安装的centos时间老是不对，所以从网上搜索组装出一个修改时区到中国，并定期自动同步时间的脚本。仅在centos下用过。">
 
 
 
@@ -381,6 +381,7 @@
 
       
         <p>最近从一个镜像安装的centos时间老是不对，所以从网上搜索组装出一个修改时区到中国，并定期自动同步时间的脚本。仅在centos下用过。</p>
+<a id="more"></a>
 <figure class="highlight routeros"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#!/bin/sh</span></div><div class="line">yum -y install ntp</div><div class="line"><span class="literal">yes</span> | cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime</div><div class="line">echo <span class="string">"ZONE=\"Asia/Shanghai\"\nUTC=false\nARC=false"</span> &gt; /etc/sysconfig/clock</div><div class="line">ntpdate -u cn.pool.ntp.org</div><div class="line">hwclock -w</div><div class="line">echo <span class="string">"/usr/sbin/ntpdate -u cn.pool.ntp.org&gt; /dev/null 2&gt;&amp;1; /sbin/hwclock -w"</span> &gt;&gt; /etc/rc.local</div><div class="line">echo <span class="string">"00 10 * * * root /usr/sbin/ntpdate -u cn.pool.ntp.org &gt; /dev/null 2&gt;&amp;1; /sbin/hwclock -w "</span> &gt;&gt; /etc/crontab</div></pre></td></tr></table></figure>
 
       
@@ -423,6 +424,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/27/how-to-choose-sideline-production/" rel="prev" title="如何选择副业">
+                如何选择副业 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -478,6 +483,11 @@ var jiathis_config={
           
 
   
+    <div class="comments" id="comments">
+      <div id="uyan_frame"></div>
+    </div>
+
+  
 
 
 
@@ -520,7 +530,7 @@ var jiathis_config={
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">13</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -531,7 +541,7 @@ var jiathis_config={
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-count">3</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -542,7 +552,7 @@ var jiathis_config={
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">20</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -755,6 +765,14 @@ var jiathis_config={
 
 
 
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2041358"></script>
+      <!-- UY END -->
+    
   
 
 
