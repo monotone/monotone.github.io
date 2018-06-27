@@ -72,7 +72,7 @@
 
 
 
-  <meta name="keywords" content=",," />
+  <meta name="keywords" content="docker,image," />
 
 
 
@@ -85,9 +85,9 @@
 
 <meta name="description" content="一般制作docker的image都是从repository中拉取，我这里有需求是从一个制作好的iso中制造出docker的image. 这里主要探索下，把这个iso转换成docker image，通过docker 容器来提供这个环境的方案。">
 <meta name="keywords" content="docker,image">
-<meta property="og:type" content="website">
+<meta property="og:type" content="article">
 <meta property="og:title" content="定制iso转docker image">
-<meta property="og:url" content="http://monotone.github.io/private/2017-12-17-customised-iso-to-docker-image.html">
+<meta property="og:url" content="http://monotone.github.io/2017/12/17/customised-iso-to-docker-image/index.html">
 <meta property="og:site_name" content="好好单调">
 <meta property="og:description" content="一般制作docker的image都是从repository中拉取，我这里有需求是从一个制作好的iso中制造出docker的image. 这里主要探索下，把这个iso转换成docker image，通过docker 容器来提供这个环境的方案。">
 <meta property="og:locale" content="zh-Hans">
@@ -124,7 +124,7 @@
 
 
 
-  <link rel="canonical" href="http://monotone.github.io/private/2017-12-17-customised-iso-to-docker-image.html"/>
+  <link rel="canonical" href="http://monotone.github.io/2017/12/17/customised-iso-to-docker-image/"/>
 
 
 
@@ -205,21 +205,11 @@
       
         
         <li class="menu-item menu-item-home">
-          <a href="/" rel="section">
+          <a href="/archives/" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
             首页
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-archives">
-          <a href="/archives/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
-            
-            归档
           </a>
         </li>
       
@@ -274,24 +264,113 @@
 
   <div id="posts" class="posts-expand">
     
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2017/12/17/customised-iso-to-docker-image/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
     
-    
-    <div class="post-block page">
       <header class="post-header">
 
-	<h1 class="post-title" itemprop="name headline">定制iso转docker image</h1>
-
-
-
-</header>
-
-      
-      
-      
-      <div class="post-body">
         
         
-          <p>一般制作docker的image都是从repository中拉取，我这里有需求是从一个制作好的iso中制造出docker的image.</p>
+          <h1 class="post-title" itemprop="name headline">定制iso转docker image</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-17T16:06:24+08:00">
+                2017-12-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>一般制作docker的image都是从repository中拉取，我这里有需求是从一个制作好的iso中制造出docker的image.</p>
 <p>这里主要探索下，把这个iso转换成docker image，通过docker 容器来提供这个环境的方案。<br><a id="more"></a></p>
 <h1 id="制作image"><a href="#制作image" class="headerlink" title="制作image"></a>制作image</h1><p>我这里先研究下有哪些可以把 iso包 打成 docker image 的方式，我这里这个测试的iso原大小为1.4G。</p>
 <h2 id="一、先安装，再从安装后的文件系统压缩出来"><a href="#一、先安装，再从安装后的文件系统压缩出来" class="headerlink" title="一、先安装，再从安装后的文件系统压缩出来"></a>一、先安装，再从安装后的文件系统压缩出来</h2><p>这里直接引用google到的一段内容，大概描述了整个步骤：</p>
@@ -351,15 +430,95 @@
 <p>另外实际上image和iso进行了转换，并且最后的容器并不是百分百和客户想要的iso环境一致。比如网络环境，docker需要通过宿主机额外的管理去提供多个虚拟网卡给容器，而客户自己的程序，可能安装的时候，会自己进行虚拟网卡配置等操作，那么这些操作在容器里就是行不通的。</p>
 <p>当然这不是docker的锅，本身其适用场景就是为了隔离应用程序环境而生，并不是为了隔离操作系统。</p>
 
-        
-      </div>
-      
-      
       
     </div>
     
     
     
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/docker/" rel="tag"># docker</a>
+          
+            <a href="/tags/image/" rel="tag"># image</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/16/reverse-proxy-for-ssh-by-nginx/" rel="next" title="nginx实现对ssh的反代">
+                <i class="fa fa-chevron-left"></i> nginx实现对ssh的反代
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/19/sync-time-to-china/" rel="prev" title="cenos同步时间到中国">
+                cenos同步时间到中国 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
   </div>
 
 
@@ -424,9 +583,9 @@
             
               <div class="site-state-item site-state-posts">
               
-                <a href="/archives/">
+                <a href="/archives">
               
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">21</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -437,7 +596,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">2</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -448,7 +607,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-count">23</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

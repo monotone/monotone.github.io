@@ -72,7 +72,7 @@
 
 
 
-  <meta name="keywords" content=",," />
+  <meta name="keywords" content="virtualbox,vm," />
 
 
 
@@ -85,15 +85,15 @@
 
 <meta name="description" content="想要监控虚拟机产生的流量，目前发现的方式只有三种：  NAT连接方式下，使用virtualbox提供的metrics功能 NAT连接方式下，使用virtualbox提供的--nictrace选项 Bridged Network连接方式下，监控监控网关上的流量  metrics子功能metrics是virtualbox提供的可以监控虚拟机资源指标子功能。通过提供一个采样数和采样间隔来估算指标，即每隔">
 <meta name="keywords" content="virtualbox,vm">
-<meta property="og:type" content="website">
-<meta property="og:title" content="virtualbox虚拟机流量监控">
-<meta property="og:url" content="http://monotone.github.io/private/2018-01-04-virtualbox-vm-traffic-monitor.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="环境隔离方案探索（五）、virtualbox虚拟机流量监控">
+<meta property="og:url" content="http://monotone.github.io/2018/06/27/environmental-isolation-5-virtualbox-traffic-moniter/index.html">
 <meta property="og:site_name" content="好好单调">
 <meta property="og:description" content="想要监控虚拟机产生的流量，目前发现的方式只有三种：  NAT连接方式下，使用virtualbox提供的metrics功能 NAT连接方式下，使用virtualbox提供的--nictrace选项 Bridged Network连接方式下，监控监控网关上的流量  metrics子功能metrics是virtualbox提供的可以监控虚拟机资源指标子功能。通过提供一个采样数和采样间隔来估算指标，即每隔">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-01-04T03:19:14.805Z">
+<meta property="og:updated_time" content="2018-06-27T06:32:47.492Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="virtualbox虚拟机流量监控">
+<meta name="twitter:title" content="环境隔离方案探索（五）、virtualbox虚拟机流量监控">
 <meta name="twitter:description" content="想要监控虚拟机产生的流量，目前发现的方式只有三种：  NAT连接方式下，使用virtualbox提供的metrics功能 NAT连接方式下，使用virtualbox提供的--nictrace选项 Bridged Network连接方式下，监控监控网关上的流量  metrics子功能metrics是virtualbox提供的可以监控虚拟机资源指标子功能。通过提供一个采样数和采样间隔来估算指标，即每隔">
 
 
@@ -124,13 +124,13 @@
 
 
 
-  <link rel="canonical" href="http://monotone.github.io/private/2018-01-04-virtualbox-vm-traffic-monitor.html"/>
+  <link rel="canonical" href="http://monotone.github.io/2018/06/27/environmental-isolation-5-virtualbox-traffic-moniter/"/>
 
 
 
 
 
-  <title>virtualbox虚拟机流量监控 | 好好单调</title>
+  <title>环境隔离方案探索（五）、virtualbox虚拟机流量监控 | 好好单调</title>
   
 
 
@@ -205,21 +205,11 @@
       
         
         <li class="menu-item menu-item-home">
-          <a href="/" rel="section">
+          <a href="/archives/" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
             首页
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-archives">
-          <a href="/archives/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
-            
-            归档
           </a>
         </li>
       
@@ -274,24 +264,113 @@
 
   <div id="posts" class="posts-expand">
     
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2018/06/27/environmental-isolation-5-virtualbox-traffic-moniter/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
     
-    
-    <div class="post-block page">
       <header class="post-header">
 
-	<h1 class="post-title" itemprop="name headline">virtualbox虚拟机流量监控</h1>
-
-
-
-</header>
-
-      
-      
-      
-      <div class="post-body">
         
         
-          <p>想要监控虚拟机产生的流量，目前发现的方式只有三种：</p>
+          <h1 class="post-title" itemprop="name headline">环境隔离方案探索（五）、virtualbox虚拟机流量监控</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-27T11:25:00+08:00">
+                2018-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>想要监控虚拟机产生的流量，目前发现的方式只有三种：</p>
 <ul>
 <li>NAT连接方式下，使用virtualbox提供的<code>metrics</code>功能</li>
 <li>NAT连接方式下，使用virtualbox提供的<code>--nictrace</code>选项</li>
@@ -321,15 +400,95 @@
 <p>这里经过测试发现，如果虚拟机直接桥接在<code>br0</code>上，而不是<code>tap0</code>上的话，是不会记录流量的，这也是为什么桥接在<code>tap0</code>上时只有<code>br0</code>上有流量。初步了解是<code>br0</code>相对于虚拟机而言实际在充当网关功能，<code>tap0</code>相对于虚拟机而言是交换机的功能，所以会出现这种情况。</p>
 <p>这种方式有个不好地方，就是需要去虚拟机里面进行相关设置。</p>
 
-        
-      </div>
-      
-      
       
     </div>
     
     
     
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/virtualbox/" rel="tag"># virtualbox</a>
+          
+            <a href="/tags/vm/" rel="tag"># vm</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/27/environmental-isolation-4-virtualbox/" rel="next" title="环境隔离方案探索（四）、virtualbox重用">
+                <i class="fa fa-chevron-left"></i> 环境隔离方案探索（四）、virtualbox重用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/27/environmental-isolation-6-libvirt-kvm/" rel="prev" title="环境隔离方案探索（六）、libvirt&kvm">
+                环境隔离方案探索（六）、libvirt&kvm <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
   </div>
 
 
@@ -394,9 +553,9 @@
             
               <div class="site-state-item site-state-posts">
               
-                <a href="/archives/">
+                <a href="/archives">
               
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">21</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -407,7 +566,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">2</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -418,7 +577,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-count">23</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

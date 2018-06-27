@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/favicons/safari-pinned-tab.svg?v=5.1.3" color="#222">
+
+
+  <link rel="manifest" href="/favicons/manifest.json">
+
+
+  <meta name="msapplication-config" content="/favicons/browserconfig.xml" />
+
+
+
+  <meta name="keywords" content="vm,kvm,libvirt," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="macos 安装 libvirt 及 libvirt-go123brew install libvirtexport PKG_CONFIG_PATH=/usr/local/Cellar/libvirt/3.10.0/lib/pkgconfiggo get github.com/libvirt/libvirt-go linux 安装 livirtyum install -y libvirt libv">
+<meta name="keywords" content="vm,kvm,libvirt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="环境隔离方案探索（六）、libvirt&amp;kvm">
+<meta property="og:url" content="http://monotone.github.io/2018/06/27/environmental-isolation-6-libvirt-kvm/index.html">
+<meta property="og:site_name" content="好好单调">
+<meta property="og:description" content="macos 安装 libvirt 及 libvirt-go123brew install libvirtexport PKG_CONFIG_PATH=/usr/local/Cellar/libvirt/3.10.0/lib/pkgconfiggo get github.com/libvirt/libvirt-go linux 安装 livirtyum install -y libvirt libv">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-06-27T06:32:08.668Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="环境隔离方案探索（六）、libvirt&amp;kvm">
+<meta name="twitter:description" content="macos 安装 libvirt 及 libvirt-go123brew install libvirtexport PKG_CONFIG_PATH=/usr/local/Cellar/libvirt/3.10.0/lib/pkgconfiggo get github.com/libvirt/libvirt-go linux 安装 livirtyum install -y libvirt libv">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://monotone.github.io/2018/06/27/environmental-isolation-6-libvirt-kvm/"/>
+
+
+
+
+
+  <title>环境隔离方案探索（六）、libvirt&kvm | 好好单调</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', '111252172-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7c59ff694c40b1b28f7086c0581f961b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好单调</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">一个80末码农的自留地</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2018/06/27/environmental-isolation-6-libvirt-kvm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">环境隔离方案探索（六）、libvirt&kvm</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-27T11:26:00+08:00">
+                2018-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="macos-安装-libvirt-及-libvirt-go"><a href="#macos-安装-libvirt-及-libvirt-go" class="headerlink" title="macos 安装 libvirt 及 libvirt-go"></a>macos 安装 libvirt 及 libvirt-go</h1><figure class="highlight routeros"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">brew install libvirt</div><div class="line"><span class="builtin-name">export</span> <span class="attribute">PKG_CONFIG_PATH</span>=/usr/local/Cellar/libvirt/3.10.0/lib/pkgconfig</div><div class="line">go <span class="builtin-name">get</span> github.com/libvirt/libvirt-go</div></pre></td></tr></table></figure>
+<h1 id="linux-安装-livirt"><a href="#linux-安装-livirt" class="headerlink" title="linux 安装 livirt"></a>linux 安装 livirt</h1><p>yum install -y libvirt libvirt-devel qemu-kvm </p>
+<p>service libvirtd start</p>
+<p>qemu:///session</p>
+<p>Linux系统中，可以通过检查<code>/proc/cpuinfo</code>文件中的CPU特性标志来查看CPU目前是否支持硬件虚拟化，在x86和x86-64平台中，Intel系列的CPU支持虚拟化标志位”vmx”，AMD 系列CPU标志位”svm”，所以可以用如下命令查看CPU是否支持虚拟化：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">grep -E <span class="string">'(vmx|svm)'</span> /proc/cpuinfo</div></pre></td></tr></table></figure>
+<p>lsmod | grep kvm</p>
+<p>modprobe kvm kvm-intel</p>
+<p>/usr/libexec/qemu-kvm</p>
+<h1 id="QEMU-QEMU-KVM-KVM-XEN-VirtualBox-libvirt"><a href="#QEMU-QEMU-KVM-KVM-XEN-VirtualBox-libvirt" class="headerlink" title="QEMU,QEMU-KVM,KVM,XEN,VirtualBox,libvirt"></a>QEMU,QEMU-KVM,KVM,XEN,VirtualBox,libvirt</h1><p>KVM和XEN是竞品，用于虚拟化硬件，XEN是半虚拟化（或者说准虚拟化，para-virtualization)，KVM是全虚拟化(full-virtualization)。因此KVM需要硬件支持，XEN不需要。KVM性能更高。</p>
+<p>QEMU是用户程序级别的虚拟化模拟器，其本身也是一个虚拟化软件，可以脱离KVM和XEN使用，也可以结合KVM和XEN一起使用，一起使用时，会优先使用KVM和XEN提供的虚拟化能力，剩余的采用自己的。</p>
+<p>QEMU-KVM是QEMU在linux下的安装包名称。</p>
+<p>VirtualBox是和QEMU一样的模拟器，在不同的平台上有不同的实现。</p>
+<p>libvirt是对QEMU、VirtualBox、VMWare这类产品API的封装，其提供了virt-install，virsh等命令行工具来方便虚拟机的安装等。</p>
+<h2 id="QEMU的安装"><a href="#QEMU的安装" class="headerlink" title="QEMU的安装"></a>QEMU的安装</h2><p><a href="https://www.qemu.org/download/#linux" target="_blank" rel="external">https://www.qemu.org/download/#linux</a></p>
+<h3 id="LINUX下"><a href="#LINUX下" class="headerlink" title="LINUX下"></a>LINUX下</h3><p>QEMU is packaged by most Linux distributions:</p>
+<ul>
+<li><p>Arch: pacman -S qemu</p>
+</li>
+<li><p>Debian/Ubuntu: apt-get install qemu</p>
+</li>
+<li><p>Fedora: dnf install @virtualization</p>
+</li>
+<li><p>Gentoo: emerge –ask app-emulation/qemu</p>
+</li>
+<li><p>RHEL/CentOS: yum install qemu-kvm</p>
+</li>
+<li><p>SUSE: zypper install qemu</p>
+</li>
+</ul>
+<h3 id="macOS下"><a href="#macOS下" class="headerlink" title="macOS下"></a>macOS下</h3><p>QEMU can be installed from Homebrew:</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">brew </span><span class="keyword">install </span>qemu</div></pre></td></tr></table></figure>
+<p>QEMU requires Mac OS X 10.5 or later, but it is recommended to use Mac OS X 10.7 or later.</p>
+<h1 id="VLAN网络模式探索"><a href="#VLAN网络模式探索" class="headerlink" title="VLAN网络模式探索"></a>VLAN网络模式探索</h1><h1 id="virsh"><a href="#virsh" class="headerlink" title="virsh"></a>virsh</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># virsh domifstat vm_name if_name     查询vm_name这个虚拟机的if_name网络接口状况</span></div><div class="line">virsh <span class="comment"># domiflist 1</span></div><div class="line">接口     类型     源        型号      MAC</div><div class="line">-------------------------------------------------------</div><div class="line">vnet0      network    default    virtio      52:54:00:e4:f8:c0</div><div class="line"></div><div class="line">virsh <span class="comment"># domifstat 1 vnet0</span></div><div class="line">vnet0 rx_bytes 456432</div><div class="line">vnet0 rx_packets 8698</div><div class="line">vnet0 rx_errs 0</div><div class="line">vnet0 rx_drop 0</div><div class="line">vnet0 tx_bytes 6458</div><div class="line">vnet0 tx_packets 45</div><div class="line">vnet0 tx_errs 0</div><div class="line">vnet0 tx_drop 0</div><div class="line"></div><div class="line"><span class="comment"># virsh domstate vm  也能显示出网卡出口流量</span></div><div class="line">virsh <span class="comment"># domstats 1</span></div><div class="line">Domain: <span class="string">'centos7.0'</span></div><div class="line">  state.state=1</div><div class="line">  state.reason=1</div><div class="line">  cpu.time=250075130705</div><div class="line">  cpu.user=26810000000</div><div class="line">  cpu.system=71080000000</div><div class="line">  balloon.current=524288</div><div class="line">  balloon.maximum=524288</div><div class="line">  balloon.swap_in=0</div><div class="line">  balloon.swap_out=0</div><div class="line">  balloon.major_fault=177</div><div class="line">  balloon.minor_fault=171273</div><div class="line">  balloon.unused=398856</div><div class="line">  balloon.available=500180</div><div class="line">  balloon.last-update=1519882249</div><div class="line">  balloon.rss=342640</div><div class="line">  vcpu.current=1</div><div class="line">  vcpu.maximum=1</div><div class="line">  vcpu.0.state=1</div><div class="line">  vcpu.0.time=78220000000</div><div class="line">  vcpu.0.wait=0</div><div class="line">  vcpu.0.halted=是</div><div class="line">  net.count=1</div><div class="line">  net.0.name=vnet0</div><div class="line">  net.0.rx.bytes=510552</div><div class="line">  net.0.rx.pkts=9728</div><div class="line">  net.0.rx.errs=0</div><div class="line">  net.0.rx.drop=0</div><div class="line">  net.0.tx.bytes=7226</div><div class="line">  net.0.tx.pkts=49</div><div class="line">  net.0.tx.errs=0</div><div class="line">  net.0.tx.drop=0</div><div class="line">  block.count=1</div><div class="line">  block.0.name=vda</div><div class="line">  block.0.path=/var/lib/libvirt/images/centos7.0.qcow2</div><div class="line">  block.0.rd.reqs=6915</div><div class="line">  block.0.rd.bytes=131828224</div><div class="line">  block.0.rd.times=6388244320</div><div class="line">  block.0.wr.reqs=1111</div><div class="line">  block.0.wr.bytes=17088512</div><div class="line">  block.0.wr.times=6475779725</div><div class="line">  block.0.fl.reqs=423</div><div class="line">  block.0.fl.times=417082331</div><div class="line">  block.0.allocation=3936853504</div><div class="line">  block.0.capacity=4294967296</div><div class="line">  block.0.physical=1710493696</div></pre></td></tr></table></figure>
+<h1 id="如何将拷贝下来的硬盘加入到卷中？"><a href="#如何将拷贝下来的硬盘加入到卷中？" class="headerlink" title="如何将拷贝下来的硬盘加入到卷中？"></a>如何将拷贝下来的硬盘加入到卷中？</h1><p>似乎必须携带xml文件，才能使用vol-create来创建一个？</p>
+<h1 id="如何固定虚拟机的IP"><a href="#如何固定虚拟机的IP" class="headerlink" title="如何固定虚拟机的IP"></a>如何固定虚拟机的IP</h1><p>可以通过<code>domifaddr domain</code> 获取</p>
+<h1 id="iptables关闭的情况下，虚拟机就无法上网"><a href="#iptables关闭的情况下，虚拟机就无法上网" class="headerlink" title="iptables关闭的情况下，虚拟机就无法上网"></a>iptables关闭的情况下，虚拟机就无法上网</h1><h1 id="QEMU-到-libvirt-命令的转换"><a href="#QEMU-到-libvirt-命令的转换" class="headerlink" title="QEMU 到 libvirt 命令的转换"></a>QEMU 到 libvirt 命令的转换</h1><p><a href="https://wiki.libvirt.org/page/QEMUSwitchToLibvirt" target="_blank" rel="external">https://wiki.libvirt.org/page/QEMUSwitchToLibvirt</a></p>
+<h1 id="Hypervisor-features"><a href="#Hypervisor-features" class="headerlink" title="Hypervisor features"></a>Hypervisor features</h1><p><strong>acpi</strong><br>    开启ACPI特性，可以在宿主机对虚拟机电源进行管理</p>
+<h1 id="多个虚拟机使用同一个系统镜像文件，会导致SSH不到先启动的那个，不知道什么原因。"><a href="#多个虚拟机使用同一个系统镜像文件，会导致SSH不到先启动的那个，不知道什么原因。" class="headerlink" title="多个虚拟机使用同一个系统镜像文件，会导致SSH不到先启动的那个，不知道什么原因。"></a>多个虚拟机使用同一个系统镜像文件，会导致SSH不到先启动的那个，不知道什么原因。</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[root@c7 networks]<span class="comment"># brctl show</span></div><div class="line">bridge name	    bridge id		         STP enabled     interfaces</div><div class="line">virbr0		    8000.5254006b491d      yes             virbr0-nic</div><div class="line">							                                   vnet0</div><div class="line">							                                   vnet1</div></pre></td></tr></table></figure>
+<h1 id="配置NAT网络"><a href="#配置NAT网络" class="headerlink" title="配置NAT网络"></a>配置NAT网络</h1><p>默认会有一个叫default的NAT虚拟网络，查看NAT网络：</p>
+<p>virsh net-list –all<br>如果要创建或者修改NAT网络，要先编辑default.xml：</p>
+<p>virsh net-edit default<br>重新加载和激活配置：</p>
+<p>virsh net-define /etc/libvirt/qemu/networks/default.xml<br>启动NAT网络：</p>
+<p>virsh net-start default<br>virsh net-autostart default<br>启动NAT后会自动生成一个虚拟桥接设备virbr0，并分配IP地址，查看状态：</p>
+<p>brctl show<br>正常情况下libirtd启动后就会启动virbr0,并自动添加IPtables规则来实现NAT,要保证打开ip_forward，在/etc/sysctl.conf中：</p>
+<p>net.ipv4.ip_forward = 1<br>sysctl -p<br>启动虚机并设置自动获取IP即可，如果想手动指定虚拟机IP，要注意配置的IP需在NAT网段内</p>
+<h1 id="问题记录"><a href="#问题记录" class="headerlink" title="问题记录"></a>问题记录</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[root@host3 danny]<span class="comment"># lsmod | grep kvm</span></div><div class="line">kvm                   346318  0</div><div class="line">[root@host3 danny]<span class="comment"># modprobe kvm-intel</span></div><div class="line">FATAL: Error inserting kvm_intel (/lib/modules/2.6.32-696.el6.x86_64/kernel/arch/x86/kvm/kvm-intel.ko): Operation not supported</div><div class="line">[root@host3 danny]<span class="comment"># dmesg|grep kvm</span></div><div class="line">kvm: disabled by bios</div><div class="line">kvm: disabled by bios</div><div class="line">kvm: disabled by bios</div></pre></td></tr></table></figure>
+<p>通过<code>dmesg|grep kvm</code>检查BISO是否开启虚拟化</p>
+<p>libvirt的qemu驱动如果要使用kvm全虚拟化，要确保<code>/usr/bin/qemu-kvm</code>文件和<code>/dev/kvm</code>设备存在。</p>
+<p>default network 启动失败</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">virsh <span class="comment"># net-start default</span></div><div class="line">错误：开始网络 default 失败</div><div class="line">错误：内部错误 Network is already <span class="keyword">in</span> use by interface virbr0</div><div class="line"></div><div class="line">$ sudo ifconfig virbr0 down</div><div class="line">$ sudo brctl delbr virbr0</div><div class="line"></div><div class="line">$ sudo virsh net-start default</div></pre></td></tr></table></figure>
+<h1 id="虚拟机创建"><a href="#虚拟机创建" class="headerlink" title="虚拟机创建"></a>虚拟机创建</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">virt-install --name c67 --ram 1024 --disk path=./c67.qcow2,size=40,sparse=<span class="literal">false</span> -v --accelerate --graphics vnc,listen=192.168.1.12 -c /home/danny/isos/centos6.7-2.6.32-573-strong10-20160722-x86_64.iso</div></pre></td></tr></table></figure>
+<h1 id="centos6-升级libvirt"><a href="#centos6-升级libvirt" class="headerlink" title="centos6 升级libvirt"></a>centos6 升级libvirt</h1><p>默认的mirrors带的版本都太低，很多新功能不支持，这里找到一个稍微高点版本的repos：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -o /etc/yum.repos.d/libvirt-1.2.21.repo https://copr.fedorainfracloud.org/coprs/mclarkson/libvirt-1.2.21/repo/epel-6/mclarkson-libvirt-1.2.21-epel-6.repo</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">yum remove libvirt-python       // 先删除这个，不然会升级失败，因为libvirt-python我们并没有升级，它依赖旧版本的libvirt.so</div><div class="line"></div><div class="line">yum install -y --nogpgcheck libvirt-1.2.21</div></pre></td></tr></table></figure>
+<p>yum groupinstall Virtualization “Virtualization Client”     “Virtualization Platform” “Virtualization Tools”</p>
+<h1 id="源码安装qemu"><a href="#源码安装qemu" class="headerlink" title="源码安装qemu"></a>源码安装qemu</h1><p>参考：</p>
+<ul>
+<li><a href="https://www.qemu.org/download/" target="_blank" rel="external">https://www.qemu.org/download/</a></li>
+<li><a href="https://wiki.qemu.org/Hosts/Linux#System_emulation" target="_blank" rel="external">https://wiki.qemu.org/Hosts/Linux#System_emulation</a></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line">yum install git glib2-devel libfdt-devel pixman-devel zlib-devel</div><div class="line"></div><div class="line">wget https://download.qemu.org/qemu-2.11.1.tar.xz</div><div class="line">tar xJf qemu-2.11.1.tar.xz</div><div class="line">d qemu-2.11.1</div><div class="line">./configure --target-list=x86_64-softmmu </div><div class="line">make -j 20</div><div class="line"></div><div class="line"></div><div class="line">[root@host3 qemu-2.11.1]<span class="comment"># make install</span></div><div class="line">mkdir -p dtc/libfdt</div><div class="line">mkdir -p dtc/tests</div><div class="line">	CHK version_gen.h</div><div class="line">make[1]: “/home/danny/packages/qemu-2.11.1/capstone/libcapstone.a”是最新的。</div><div class="line">install -d -m 0755 <span class="string">"/usr/local/share/qemu"</span></div><div class="line">install -d -m 0755 <span class="string">"/usr/local/var"</span>/run</div><div class="line">install -d -m 0755 <span class="string">"/usr/local/bin"</span></div><div class="line">install -c -m 0755 qemu-ga ivshmem-client ivshmem-server qemu-nbd qemu-img qemu-io  scsi/qemu-pr-helper <span class="string">"/usr/local/bin"</span></div><div class="line">strip <span class="string">"/usr/local/bin/qemu-ga"</span> <span class="string">"/usr/local/bin/ivshmem-client"</span> <span class="string">"/usr/local/bin/ivshmem-server"</span> <span class="string">"/usr/local/bin/qemu-nbd"</span> <span class="string">"/usr/local/bin/qemu-img"</span> <span class="string">"/usr/local/bin/qemu-io"</span> <span class="string">"/usr/local/bin/qemu-pr-helper"</span></div><div class="line">install -d -m 0755 <span class="string">"/usr/local/libexec"</span></div><div class="line">install -c -m 0755 qemu-bridge-helper <span class="string">"/usr/local/libexec"</span></div><div class="line">strip <span class="string">"/usr/local/libexec/qemu-bridge-helper"</span></div><div class="line"><span class="built_in">set</span> -e; <span class="keyword">for</span> x <span class="keyword">in</span> bios.bin bios-256k.bin sgabios.bin vgabios.bin vgabios-cirrus.bin vgabios-stdvga.bin vgabios-vmware.bin vgabios-qxl.bin vgabios-virtio.bin acpi-dsdt.aml ppc_rom.bin openbios-sparc32 openbios-sparc64 openbios-ppc QEMU,tcx.bin QEMU,cgthree.bin pxe-e1000.rom pxe-eepro100.rom pxe-ne2k_pci.rom pxe-pcnet.rom pxe-rtl8139.rom pxe-virtio.rom efi-e1000.rom efi-eepro100.rom efi-ne2k_pci.rom efi-pcnet.rom efi-rtl8139.rom efi-virtio.rom efi-e1000e.rom efi-vmxnet3.rom qemu-icon.bmp qemu_logo_no_text.svg bamboo.dtb petalogix-s3adsp1800.dtb petalogix-ml605.dtb multiboot.bin linuxboot.bin linuxboot_dma.bin kvmvapic.bin s390-ccw.img s390-netboot.img spapr-rtas.bin slof.bin skiboot.lid palcode-clipper u-boot.e500 qemu_vga.ndrv; <span class="keyword">do</span> \</div><div class="line">		install -c -m 0644 /home/danny/packages/qemu-2.11.1/pc-bios/<span class="variable">$x</span> <span class="string">"/usr/local/share/qemu"</span>; \</div><div class="line">	<span class="keyword">done</span></div><div class="line">install -d -m 0755 <span class="string">"/usr/local/share/qemu/keymaps"</span></div><div class="line"><span class="built_in">set</span> -e; <span class="keyword">for</span> x <span class="keyword">in</span> da     en-gb  et  fr     fr-ch  is  lt  modifiers  no  pt-br  sv ar      de     en-us  <span class="keyword">fi</span>  fr-be  hr     it  lv  nl         pl  ru     th common  de-ch  es     fo  fr-ca  hu     ja  mk  nl-be      pt  sl     tr bepo    cz; <span class="keyword">do</span> \</div><div class="line">		install -c -m 0644 /home/danny/packages/qemu-2.11.1/pc-bios/keymaps/<span class="variable">$x</span> <span class="string">"/usr/local/share/qemu/keymaps"</span>; \</div><div class="line">	<span class="keyword">done</span></div><div class="line">install -c -m 0644 /home/danny/packages/qemu-2.11.1/trace-events-all <span class="string">"/usr/local/share/qemu/trace-events-all"</span></div><div class="line"><span class="keyword">for</span> d <span class="keyword">in</span> x86_64-softmmu; <span class="keyword">do</span> \</div><div class="line">	make --no-print-directory BUILD_DIR=/home/danny/packages/qemu-2.11.1 TARGET_DIR=<span class="variable">$d</span>/ -C <span class="variable">$d</span> install || <span class="built_in">exit</span> 1 ; \</div><div class="line">        <span class="keyword">done</span></div><div class="line">install -d -m 0755 <span class="string">"/usr/local/bin"</span></div><div class="line">install -c -m 0755 qemu-system-x86_64  <span class="string">"/usr/local/bin"</span></div><div class="line">strip <span class="string">"/usr/local/bin/qemu-system-x86_64"</span></div><div class="line"></div><div class="line"></div><div class="line">ln -s /usr/<span class="built_in">local</span>/bin/qemu-system-x86_64 /usr/libexec/qemu-kvm</div><div class="line">ln -s /usr/<span class="built_in">local</span>/bin/qemu-system-x86_64 /usr/bin/qemu-kvm</div></pre></td></tr></table></figure>
+<p>(1) 源码编译安装的qemu需要手动卸载：</p>
+<p>可执行文件默认放在/usr/local/bin</p>
+<p>库文件默认存放在/usr/local/libexec<br>配置文件默认存放在/usr/local/etc<br>共享文件默认存放在/usr/local/share</p>
+<p>卸载源码只需将上面四个目录中相关文件或者目录删除</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">rm -rf <span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>qemu-*</div><div class="line">rm -rf <span class="regexp">/usr/</span>local<span class="regexp">/libexec/</span>qemu-bridge-helper</div><div class="line">rm -rf <span class="regexp">/usr/</span>local<span class="regexp">/etc/</span>qemu</div><div class="line">rm -rf <span class="regexp">/usr/</span>local<span class="regexp">/share/</span>qemu</div></pre></td></tr></table></figure>
+<h2 id="经测试，安装最新版本的会出现"><a href="#经测试，安装最新版本的会出现" class="headerlink" title="经测试，安装最新版本的会出现"></a>经测试，安装最新版本的会出现</h2><p>qemu_system_x86-64 无权限访问问题，我这里主要是需要查询虚拟机IP地址的接口，根据<code>https://libvirt.org/hvsupport.html#</code>可知virDomainInterfaceAddresses是从1.2.14版本开始支持的。我直接去安装1.3.1</p>
+<h1 id="virtualbox-安装"><a href="#virtualbox-安装" class="headerlink" title="virtualbox 安装"></a>virtualbox 安装</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">curl -o /etc/yum.repos.d/virtualbox.repo https://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo</div><div class="line"></div><div class="line">yum install -y virtualbox-4.3</div></pre></td></tr></table></figure>
+<h1 id="虚拟机IP获取方式"><a href="#虚拟机IP获取方式" class="headerlink" title="虚拟机IP获取方式"></a>虚拟机IP获取方式</h1><p>可以直接通过API<code>virDomainInterfaceAddresses</code>获取，但是这个接口在1.2.14版本开始才有效。    </p>
+<p>在centos7上，直接通过yum仓库安装的libvirt版本已经是3.2.0了，所以直接可以获取。</p>
+<p>但是在centos6.9上，从yum仓库安装的libvirt版本是0.10.0，不支持这个接口，所以需要尝试以下方式：</p>
+<h3 id="方式一：限制DHCP提供的IP范围只有一个"><a href="#方式一：限制DHCP提供的IP范围只有一个" class="headerlink" title="方式一：限制DHCP提供的IP范围只有一个"></a>方式一：限制DHCP提供的IP范围只有一个</h3><p>已经测试过，可以。</p>
+<h3 id="方式二：向DHCP服务中指定mac来绑定IP"><a href="#方式二：向DHCP服务中指定mac来绑定IP" class="headerlink" title="方式二：向DHCP服务中指定mac来绑定IP"></a>方式二：向DHCP服务中指定mac来绑定IP</h3><p><code>&lt;host mac=&quot;00:16:3e:3e:a9:1a&quot; name=&quot;bar.example.com&quot; ip=&quot;192.168.122.11&quot;/&gt;</code></p>
+<p>看文档是必须指定name属性，但是经测试似乎不需要。</p>
+<p>另外直接通过命令<code>virsh net-update default modify ip-dhcp-host &quot;&lt;host mac=&#39;52:54:00:0b:b5:ac&#39; ip=&#39;192.168.122.205&#39; /&gt;&quot; --live --config --current</code>去进行设置，也没能实时生效，所以最好是先设置好之后再启动虚拟机。</p>
+<h1 id="设置端口转发，让host外的网络可用直接访问虚拟机"><a href="#设置端口转发，让host外的网络可用直接访问虚拟机" class="headerlink" title="设置端口转发，让host外的网络可用直接访问虚拟机"></a>设置端口转发，让host外的网络可用直接访问虚拟机</h1><p><a href="https://wiki.libvirt.org/page/Networking#Forwarding_Incoming_Connections" target="_blank" rel="external">https://wiki.libvirt.org/page/Networking#Forwarding_Incoming_Connections</a></p>
+<p>通过启动libvirt为qemu准备的hook去向iptables中安装必要的转发规则，因为默认的NAT网络实际就是通过设置iptables来达到虚拟机可以访问外网，并且宿主机可以访问虚拟机的。</p>
+<h3 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h3><ol>
+<li>获取domain的名字（目的是能根据名字自动区分为哪个虚拟机设置端口转发）</li>
+<li>获取domain的IP（要保持不变）</li>
+<li>domain提供服务的端口</li>
+<li>host提供转发的端口</li>
+<li>停止domain</li>
+<li><p>创建 <code>/etc/libvirt/hooks/qemu</code>，或者使用如下脚本内容替换该文件，并增加执行权限。</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="meta">#!/bin/bash</span></div><div class="line"><span class="comment"># IMPORTANT: Change the "VM NAME" string to match your actual VM Name.</span></div><div class="line"><span class="comment"># In order to create rules to other VMs, just duplicate the below block and configure</span></div><div class="line"><span class="comment"># it accordingly.</span></div><div class="line"></div><div class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$&#123;1&#125;</span>"</span> = <span class="string">"VM NAME"</span> ]; <span class="keyword">then</span></div><div class="line">   <span class="comment"># Update the following variables to fit your setup</span></div><div class="line">   GUEST_IP=</div><div class="line">   GUEST_PORT=</div><div class="line">   HOST_PORT=</div><div class="line">    </div><div class="line">   <span class="keyword">if</span> [ <span class="string">"<span class="variable">$&#123;2&#125;</span>"</span> = <span class="string">"stopped"</span> ] || [ <span class="string">"<span class="variable">$&#123;2&#125;</span>"</span> = <span class="string">"reconnect"</span> ]; <span class="keyword">then</span></div><div class="line">	/sbin/iptables -D FORWARD -o virbr0 -d  <span class="variable">$GUEST_IP</span> -j ACCEPT</div><div class="line">	/sbin/iptables -t nat -D PREROUTING -p tcp --dport <span class="variable">$HOST_PORT</span> -j DNAT --to <span class="variable">$GUEST_IP</span>:<span class="variable">$GUEST_PORT</span></div><div class="line">   <span class="keyword">fi</span></div><div class="line">   <span class="keyword">if</span> [ <span class="string">"<span class="variable">$&#123;2&#125;</span>"</span> = <span class="string">"start"</span> ] || [ <span class="string">"<span class="variable">$&#123;2&#125;</span>"</span> = <span class="string">"reconnect"</span> ]; <span class="keyword">then</span></div><div class="line">	/sbin/iptables -I FORWARD -o virbr0 -d  <span class="variable">$GUEST_IP</span> -j ACCEPT</div><div class="line">	/sbin/iptables -t nat -I PREROUTING -p tcp --dport <span class="variable">$HOST_PORT</span> -j DNAT --to <span class="variable">$GUEST_IP</span>:<span class="variable">$GUEST_PORT</span></div><div class="line">   <span class="keyword">fi</span></div><div class="line"><span class="keyword">fi</span></div></pre></td></tr></table></figure>
+</li>
+<li><p>重启libvirtd服务</p>
+</li>
+<li>启动domain</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/vm/" rel="tag"># vm</a>
+          
+            <a href="/tags/kvm/" rel="tag"># kvm</a>
+          
+            <a href="/tags/libvirt/" rel="tag"># libvirt</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/27/environmental-isolation-5-virtualbox-traffic-moniter/" rel="next" title="环境隔离方案探索（五）、virtualbox虚拟机流量监控">
+                <i class="fa fa-chevron-left"></i> 环境隔离方案探索（五）、virtualbox虚拟机流量监控
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/27/environmental-isolation-design-virtualbox/" rel="prev" title="环境隔离方案设计之virtualbox">
+                环境隔离方案设计之virtualbox <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="uyan_frame"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/avatar.gif"
+                alt="单调" />
+            
+              <p class="site-author-name" itemprop="name">单调</p>
+              <p class="site-description motion-element" itemprop="description">谁能够划船不用浆</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#macos-安装-libvirt-及-libvirt-go"><span class="nav-number">1.</span> <span class="nav-text">macos 安装 libvirt 及 libvirt-go</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#linux-安装-livirt"><span class="nav-number">2.</span> <span class="nav-text">linux 安装 livirt</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#QEMU-QEMU-KVM-KVM-XEN-VirtualBox-libvirt"><span class="nav-number">3.</span> <span class="nav-text">QEMU,QEMU-KVM,KVM,XEN,VirtualBox,libvirt</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#QEMU的安装"><span class="nav-number">3.1.</span> <span class="nav-text">QEMU的安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LINUX下"><span class="nav-number">3.1.1.</span> <span class="nav-text">LINUX下</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#macOS下"><span class="nav-number">3.1.2.</span> <span class="nav-text">macOS下</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VLAN网络模式探索"><span class="nav-number">4.</span> <span class="nav-text">VLAN网络模式探索</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#virsh"><span class="nav-number">5.</span> <span class="nav-text">virsh</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何将拷贝下来的硬盘加入到卷中？"><span class="nav-number">6.</span> <span class="nav-text">如何将拷贝下来的硬盘加入到卷中？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何固定虚拟机的IP"><span class="nav-number">7.</span> <span class="nav-text">如何固定虚拟机的IP</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#iptables关闭的情况下，虚拟机就无法上网"><span class="nav-number">8.</span> <span class="nav-text">iptables关闭的情况下，虚拟机就无法上网</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#QEMU-到-libvirt-命令的转换"><span class="nav-number">9.</span> <span class="nav-text">QEMU 到 libvirt 命令的转换</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hypervisor-features"><span class="nav-number">10.</span> <span class="nav-text">Hypervisor features</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#多个虚拟机使用同一个系统镜像文件，会导致SSH不到先启动的那个，不知道什么原因。"><span class="nav-number">11.</span> <span class="nav-text">多个虚拟机使用同一个系统镜像文件，会导致SSH不到先启动的那个，不知道什么原因。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置NAT网络"><span class="nav-number">12.</span> <span class="nav-text">配置NAT网络</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#问题记录"><span class="nav-number">13.</span> <span class="nav-text">问题记录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#虚拟机创建"><span class="nav-number">14.</span> <span class="nav-text">虚拟机创建</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#centos6-升级libvirt"><span class="nav-number">15.</span> <span class="nav-text">centos6 升级libvirt</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源码安装qemu"><span class="nav-number">16.</span> <span class="nav-text">源码安装qemu</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#经测试，安装最新版本的会出现"><span class="nav-number">16.1.</span> <span class="nav-text">经测试，安装最新版本的会出现</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#virtualbox-安装"><span class="nav-number">17.</span> <span class="nav-text">virtualbox 安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#虚拟机IP获取方式"><span class="nav-number">18.</span> <span class="nav-text">虚拟机IP获取方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#方式一：限制DHCP提供的IP范围只有一个"><span class="nav-number">18.0.1.</span> <span class="nav-text">方式一：限制DHCP提供的IP范围只有一个</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方式二：向DHCP服务中指定mac来绑定IP"><span class="nav-number">18.0.2.</span> <span class="nav-text">方式二：向DHCP服务中指定mac来绑定IP</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置端口转发，让host外的网络可用直接访问虚拟机"><span class="nav-number">19.</span> <span class="nav-text">设置端口转发，让host外的网络可用直接访问虚拟机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#步骤"><span class="nav-number">19.0.1.</span> <span class="nav-text">步骤</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">单调</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=64776956";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2041358"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

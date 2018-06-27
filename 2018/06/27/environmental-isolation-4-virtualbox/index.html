@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/favicons/safari-pinned-tab.svg?v=5.1.3" color="#222">
+
+
+  <link rel="manifest" href="/favicons/manifest.json">
+
+
+  <meta name="msapplication-config" content="/favicons/browserconfig.xml" />
+
+
+
+  <meta name="keywords" content="docker,vm," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前面探索了virtualbox的安装和配置过程，主要熟悉了下virtualbox提供了对虚拟机的哪些配置，能不能符合使用需求。 现在要考虑实际应用场景，virtualbox的虚拟机可重用性问题。理想的效果是，就像个箱子一样，要用的时候搬过来就行了，至于箱子里面是啥样我完全不管。但实际中箱子的放置是存在条件的，比如你箱子太大了，不适合放我这用等。 我们这里先考虑下，如何快速的重用virtualbox">
+<meta name="keywords" content="docker,vm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="环境隔离方案探索（四）、virtualbox重用">
+<meta property="og:url" content="http://monotone.github.io/2018/06/27/environmental-isolation-4-virtualbox/index.html">
+<meta property="og:site_name" content="好好单调">
+<meta property="og:description" content="前面探索了virtualbox的安装和配置过程，主要熟悉了下virtualbox提供了对虚拟机的哪些配置，能不能符合使用需求。 现在要考虑实际应用场景，virtualbox的虚拟机可重用性问题。理想的效果是，就像个箱子一样，要用的时候搬过来就行了，至于箱子里面是啥样我完全不管。但实际中箱子的放置是存在条件的，比如你箱子太大了，不适合放我这用等。 我们这里先考虑下，如何快速的重用virtualbox">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-06-27T06:31:50.742Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="环境隔离方案探索（四）、virtualbox重用">
+<meta name="twitter:description" content="前面探索了virtualbox的安装和配置过程，主要熟悉了下virtualbox提供了对虚拟机的哪些配置，能不能符合使用需求。 现在要考虑实际应用场景，virtualbox的虚拟机可重用性问题。理想的效果是，就像个箱子一样，要用的时候搬过来就行了，至于箱子里面是啥样我完全不管。但实际中箱子的放置是存在条件的，比如你箱子太大了，不适合放我这用等。 我们这里先考虑下，如何快速的重用virtualbox">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://monotone.github.io/2018/06/27/environmental-isolation-4-virtualbox/"/>
+
+
+
+
+
+  <title>环境隔离方案探索（四）、virtualbox重用 | 好好单调</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', '111252172-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7c59ff694c40b1b28f7086c0581f961b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好单调</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">一个80末码农的自留地</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2018/06/27/environmental-isolation-4-virtualbox/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">环境隔离方案探索（四）、virtualbox重用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-27T11:24:00+08:00">
+                2018-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>前面探索了virtualbox的安装和配置过程，主要熟悉了下virtualbox提供了对虚拟机的哪些配置，能不能符合使用需求。</p>
+<p>现在要考虑实际应用场景，virtualbox的虚拟机可重用性问题。理想的效果是，就像个箱子一样，要用的时候搬过来就行了，至于箱子里面是啥样我完全不管。但实际中箱子的放置是存在条件的，比如你箱子太大了，不适合放我这用等。</p>
+<p>我们这里先考虑下，如何快速的重用virtualbox的虚拟机。</p>
+<h2 id="直接重新安装"><a href="#直接重新安装" class="headerlink" title="直接重新安装"></a>直接重新安装</h2><p>这种方式前面已经试过，好处是随便自己定制，坏处是安装时间太长，而且可能需要进入到虚拟机系统内部去进行相关设置。</p>
+<h2 id="拷贝虚拟机文件夹"><a href="#拷贝虚拟机文件夹" class="headerlink" title="拷贝虚拟机文件夹"></a>拷贝虚拟机文件夹</h2><p>直接拷贝虚拟机文件夹，比如在A机器上安装好之后，现在要在B机器上使用，就直接将A机器上虚拟机相关的配置文件和虚拟机磁盘一起拷贝到B机器上，然后在B机器上重新进行注册即可。</p>
+<p>实际上虚拟机的配置文件<code>xxx.vbox</code>就是一个xml格式的文件，里面记录了这个虚拟机的名字，模拟的硬件配置等信息，重新注册的过程中如果出现了什么错误，可以通过修改这个配置文件解决。</p>
+<p>这种方式的缺点是，这个文件夹很大，比实际安装的那个iso可能还大，比如测试过程中，我的iso大小才1个多G，但是安装完之后这个文件夹有4个多G。如果虚拟机磁盘是固定大小的，则更大的离谱，完全不方便移动。</p>
+<h2 id="使用virtualbox的导入导出"><a href="#使用virtualbox的导入导出" class="headerlink" title="使用virtualbox的导入导出"></a>使用virtualbox的导入导出</h2><p>virtualbox本身提供了导入导出功能，导出后的虚拟机是一个<code>.ova</code>格式文件，实质上就是对虚拟机的配置文件和虚拟磁盘的压缩。</p>
+<p>但是不同的是，既然这个是virtualbox提供的，自然做了额外的工作，比如会修改掉id，并且导入的时候还可以指定是否保留原来的网卡或者硬盘mac地址等，保留网卡mac地址很重要，因为如果用的是静态IP地址的话，如果更改了网卡的mac地址，IP是不生效的，这个是测试出来的，具体原因还没搞明白。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#!/bin/bash</span></div><div class="line"><span class="built_in">set</span> -e</div><div class="line"><span class="built_in">set</span> -o errexit</div><div class="line"></div><div class="line">SSH_PORT=61493</div><div class="line">VMFOLDER=<span class="string">"/Users/danny/tmp"</span></div><div class="line"><span class="comment"># VMFOLDER="/root/vms"</span></div><div class="line">VMNAME=<span class="string">"test"</span></div><div class="line">OVA=<span class="string">"/Users/danny/tmp/test.ova"</span></div><div class="line"><span class="comment"># OVA="/root/test.ova"</span></div><div class="line"><span class="comment"># 最大CPU个数：--cpus./</span></div><div class="line">CPUS=1</div><div class="line"><span class="comment"># 允许的CPU使用量：--cpuexecutioncap 50</span></div><div class="line">CPUCAP=100</div><div class="line"><span class="comment"># 最大内存，MB: --memory</span></div><div class="line">MEMORY=1024 </div><div class="line"><span class="comment"># 最大带宽（上行）: --limit &lt;megabytes per second&gt;[k|m|g|K|M|G]</span></div><div class="line">RATE=1m</div><div class="line"></div><div class="line"><span class="comment"># 导入前要知道</span></div><div class="line"><span class="comment"># 1、需要多大空间来放虚拟机</span></div><div class="line"><span class="comment"># 2、需要多大的数据盘</span></div><div class="line"><span class="comment"># 3、至少需要多少CPU、内存资源</span></div><div class="line"><span class="comment"># 4、带宽</span></div><div class="line"></div><div class="line"><span class="comment"># 修改默认目录</span></div><div class="line">VBoxManage setproperty machinefolder <span class="variable">$&#123;VMFOLDER&#125;</span></div><div class="line"></div><div class="line"><span class="comment"># 导入</span></div><div class="line">DISK_UNIT=6</div><div class="line">VBoxManage import <span class="variable">$&#123;OVA&#125;</span> --options keepnatmacs --vsys 0  --vmname <span class="variable">$&#123;VMNAME&#125;</span> --unit <span class="variable">$&#123;DISK_UNIT&#125;</span> --disk <span class="string">"<span class="variable">$&#123;VMFOLDER&#125;</span>/<span class="variable">$&#123;VMNAME&#125;</span>/<span class="variable">$&#123;VMNAME&#125;</span>.vdi"</span></div><div class="line"></div><div class="line"><span class="comment"># 限制资源使用</span></div><div class="line">VBoxManage bandwidthctl <span class="variable">$&#123;VMNAME&#125;</span> add <span class="variable">$&#123;VMNAME&#125;</span>_Limit --<span class="built_in">type</span> network --<span class="built_in">limit</span> <span class="variable">$&#123;RATE&#125;</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --cpus <span class="variable">$&#123;CPUS&#125;</span> --cpuexecutioncap <span class="variable">$&#123;CPUCAP&#125;</span> --memory <span class="variable">$&#123;MEMORY&#125;</span> --nicbandwidthgroup1 <span class="variable">$&#123;VMNAME&#125;</span>_Limit</div><div class="line"></div><div class="line"><span class="comment"># 添加端口映射，这个是可以继承的。即如果虚拟机本身是配置了的，那么导出的这个本身就是加了的。</span></div><div class="line"><span class="comment"># VBoxManage modifyvm $&#123;VMNAME&#125; --natpf1 "tcp_2222_61493,tcp,,2222,,$&#123;SSH_PORT&#125;"</span></div><div class="line"><span class="comment"># VBoxManage modifyvm $&#123;VMNAME&#125; --natpf1 "tcp_8080_80,tcp,,8080,,80"</span></div><div class="line"><span class="comment"># VBoxManage modifyvm $&#123;VMNAME&#125; --natpf1 "tcp_10443_443,tcp,,10443,,443"</span></div><div class="line"></div><div class="line"><span class="comment"># 创建新磁盘</span></div><div class="line"><span class="comment"># DISKSIZE=1024</span></div><div class="line"><span class="comment"># DISKTYPE="Standard"</span></div><div class="line"><span class="comment"># DISKPATH="$&#123;VMFOLDER&#125;/$&#123;VMNAME&#125;/$&#123;VMNAME&#125;_1.vdi"</span></div><div class="line"><span class="comment"># STORAGECTL_NAME="SATA"</span></div><div class="line"><span class="comment"># VBoxManage createmedium disk --filename $&#123;DISKPATH&#125; --format VDI --size $&#123;DISKSIZE&#125; --variant $&#123;DISKTYPE&#125;</span></div><div class="line"><span class="comment"># VBoxManage storageattach $&#123;VMNAME&#125; --storagectl $&#123;STORAGECTL_NAME&#125; --device 0 --port 1 --type hdd\</span></div><div class="line"><span class="comment">#     --medium $&#123;DISKPATH&#125;</span></div><div class="line"></div><div class="line"><span class="comment"># 启动</span></div><div class="line">VBoxManage startvm <span class="variable">$&#123;VMNAME&#125;</span> --<span class="built_in">type</span> headless</div><div class="line"></div><div class="line"><span class="comment"># VBoxManage unregistervm $&#123;VMNAME&#125; --delete</span></div></pre></td></tr></table></figure>
+<p>有几点需要注意：</p>
+<ol>
+<li>重新导入后的虚拟机，如果不重新命名虚拟机，而机器上又存在同名或者同ID了的虚拟机，则会失败，并且会在同名那个虚拟机下面创建虚拟磁盘而不会删除。</li>
+<li>重新导入后的虚拟机，默认的虚拟磁盘格式为<code>.vmdk</code>，这种格式不可以扩容。如果有扩容需要需要在导入的时候重新指定磁盘文件名，现在可以更改成<code>.vdi</code>后缀即可。但是<code>import</code>命令里面磁盘修改的选项是根据VM的硬件配置而不同的。</li>
+<li>重新导入后的虚拟机，如果扩容原虚拟磁盘，还需要进入虚拟机内部对磁盘进行相关设置才行。</li>
+</ol>
+<p>以上几点主要就是重新导入后虚拟磁盘的扩容问题，因为新的机器上磁盘空间分布会变化，调整磁盘很平常。可以采取系统盘+数据盘的方式。即制作导出包的时候，只提供系统盘，等重新导入后，再挂载一个数据盘上去。</p>
+<p>其他需要修改的配置，则在导入后，直接<code>modifyvm</code>即可。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/docker/" rel="tag"># docker</a>
+          
+            <a href="/tags/vm/" rel="tag"># vm</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/27/environmental-isolation-3-virtualbox/" rel="next" title="环境隔离方案探索（三）、virtualbox">
+                <i class="fa fa-chevron-left"></i> 环境隔离方案探索（三）、virtualbox
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/27/environmental-isolation-5-virtualbox-traffic-moniter/" rel="prev" title="环境隔离方案探索（五）、virtualbox虚拟机流量监控">
+                环境隔离方案探索（五）、virtualbox虚拟机流量监控 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="uyan_frame"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/avatar.gif"
+                alt="单调" />
+            
+              <p class="site-author-name" itemprop="name">单调</p>
+              <p class="site-description motion-element" itemprop="description">谁能够划船不用浆</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#直接重新安装"><span class="nav-number">1.</span> <span class="nav-text">直接重新安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拷贝虚拟机文件夹"><span class="nav-number">2.</span> <span class="nav-text">拷贝虚拟机文件夹</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用virtualbox的导入导出"><span class="nav-number">3.</span> <span class="nav-text">使用virtualbox的导入导出</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">单调</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=64776956";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2041358"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

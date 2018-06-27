@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/favicons/safari-pinned-tab.svg?v=5.1.3" color="#222">
+
+
+  <link rel="manifest" href="/favicons/manifest.json">
+
+
+  <meta name="msapplication-config" content="/favicons/browserconfig.xml" />
+
+
+
+  <meta name="keywords" content="virtualbox,vm," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="虚拟化是云计算的基础。简单的说，虚拟化使得在一台物理的服务器上可以跑多台虚拟机，虚拟机共享物理机的 CPU、内存、IO 硬件资源，但逻辑上虚拟机之间是相互隔离的。 物理机我们一般称为宿主机（Host），宿主机上面的虚拟机称为客户机（Guest）。 那么 Host 是如何将自己的硬件资源虚拟化，并提供给 Guest 使用的呢？这个主要是通过一个叫做 Hypervisor 的程序实现的。 根据 Hyp">
+<meta name="keywords" content="virtualbox,vm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="环境隔离方案探索（三）、virtualbox">
+<meta property="og:url" content="http://monotone.github.io/2018/06/27/environmental-isolation-3-virtualbox/index.html">
+<meta property="og:site_name" content="好好单调">
+<meta property="og:description" content="虚拟化是云计算的基础。简单的说，虚拟化使得在一台物理的服务器上可以跑多台虚拟机，虚拟机共享物理机的 CPU、内存、IO 硬件资源，但逻辑上虚拟机之间是相互隔离的。 物理机我们一般称为宿主机（Host），宿主机上面的虚拟机称为客户机（Guest）。 那么 Host 是如何将自己的硬件资源虚拟化，并提供给 Guest 使用的呢？这个主要是通过一个叫做 Hypervisor 的程序实现的。 根据 Hyp">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-06-27T06:30:49.494Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="环境隔离方案探索（三）、virtualbox">
+<meta name="twitter:description" content="虚拟化是云计算的基础。简单的说，虚拟化使得在一台物理的服务器上可以跑多台虚拟机，虚拟机共享物理机的 CPU、内存、IO 硬件资源，但逻辑上虚拟机之间是相互隔离的。 物理机我们一般称为宿主机（Host），宿主机上面的虚拟机称为客户机（Guest）。 那么 Host 是如何将自己的硬件资源虚拟化，并提供给 Guest 使用的呢？这个主要是通过一个叫做 Hypervisor 的程序实现的。 根据 Hyp">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://monotone.github.io/2018/06/27/environmental-isolation-3-virtualbox/"/>
+
+
+
+
+
+  <title>环境隔离方案探索（三）、virtualbox | 好好单调</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', '111252172-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7c59ff694c40b1b28f7086c0581f961b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好单调</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">一个80末码农的自留地</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2018/06/27/environmental-isolation-3-virtualbox/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">环境隔离方案探索（三）、virtualbox</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-27T11:23:00+08:00">
+                2018-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>虚拟化是云计算的基础。简单的说，虚拟化使得在一台物理的服务器上可以跑多台虚拟机，虚拟机共享物理机的 CPU、内存、IO 硬件资源，但逻辑上虚拟机之间是相互隔离的。</p>
+<p>物理机我们一般称为宿主机（Host），宿主机上面的虚拟机称为客户机（Guest）。</p>
+<p>那么 Host 是如何将自己的硬件资源虚拟化，并提供给 Guest 使用的呢？<br>这个主要是通过一个叫做 Hypervisor 的程序实现的。</p>
+<p>根据 Hypervisor 的实现方式和所处的位置，虚拟化又分为两种：<br>1型虚拟化和2型虚拟化</p>
+<p>1、型虚拟化<br>Hypervisor 直接安装在物理机上，多个虚拟机在 Hypervisor 上运行。Hypervisor 实现方式一般是一个特殊定制的 Linux 系统。Xen 和 VMWare 的 ESXi 都属于这个类型。</p>
+<p>2、型虚拟化<br>物理机上首先安装常规的操作系统，比如 Redhat、Ubuntu 和 Windows。Hypervisor 作为 OS 上的一个程序模块运行，并对管理虚拟机进行管理。KVM、VirtualBox 和 VMWare Workstation 都属于这个类型。</p>
+<p>理论上讲：</p>
+<p>1型虚拟化一般对硬件虚拟化功能进行了特别优化，性能上比2型要高；</p>
+<p>2型虚拟化因为基于普通的操作系统，会比较灵活，比如支持虚拟机嵌套。嵌套意味着可以在KVM虚拟机中再运行KVM。</p>
+<p>好了，总之先从virtualbox开始吧。</p>
+<h1 id="VirtualBox"><a href="#VirtualBox" class="headerlink" title="VirtualBox"></a>VirtualBox</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><ul>
+<li>开源，小（约30M)，软件虚拟化（大多数无需硬件虚拟化支持）。</li>
+<li>支持很多平台：Windows, many Linux distributions, Mac OS X, Solaris and OpenSolaris</li>
+<li><a href="https://www.virtualbox.org/wiki/Guest_OSes" target="_blank" rel="external">支持很多客户系统</a>: linux内核2.4和2.6以上。推荐2.6.13+。2.6.18和2.6.18.2可能引起启动时崩溃。</li>
+<li>扩展包支持”Disk image encryption with AES algorithm”，这个可以用来防止虚拟机被盗用从而泄露虚拟机内程序？？</li>
+</ul>
+<h2 id="创建vm"><a href="#创建vm" class="headerlink" title="创建vm"></a>创建vm</h2><p>且看脚本：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#!/bin/bash </span></div><div class="line"></div><div class="line"><span class="comment"># 设置出错则停止退出</span></div><div class="line"><span class="built_in">set</span> -e</div><div class="line"><span class="built_in">set</span> -o errexit</div><div class="line"></div><div class="line">VMFOLDER=<span class="string">"/Users/danny/tmp"</span></div><div class="line">VMNAME=<span class="string">"test1"</span></div><div class="line">ISO=<span class="string">"centos7-custom.iso"</span></div><div class="line">DISKSIZE=8192</div><div class="line">DISKTYPE=<span class="string">"Standard"</span></div><div class="line"></div><div class="line"></div><div class="line"><span class="comment"># 0、修改虚拟机存放目录</span></div><div class="line">VBoxManage setproperty machinefolder <span class="variable">$&#123;VMFOLDER&#125;</span></div><div class="line"></div><div class="line"><span class="comment"># 1、创建虚拟机，同时注册到VirtualBox</span></div><div class="line">VBoxManage createvm --name <span class="variable">$&#123;VMNAME&#125;</span> --ostype <span class="string">"RedHat_64"</span> --register</div><div class="line"></div><div class="line"><span class="comment"># 2、配置虚拟硬盘</span></div><div class="line"><span class="comment"># 2.1 创建虚拟磁盘</span></div><div class="line">VBoxManage createmedium disk --filename <span class="string">"<span class="variable">$&#123;VMFOLDER&#125;</span>/<span class="variable">$&#123;VMNAME&#125;</span>/<span class="variable">$&#123;VMNAME&#125;</span>.vdi"</span>\</div><div class="line">    --format VDI --size <span class="variable">$&#123;DISKSIZE&#125;</span> --variant <span class="variable">$&#123;DISKTYPE&#125;</span></div><div class="line"></div><div class="line"><span class="comment"># 2.2 创建存储控制器，用来挂载虚拟磁盘</span></div><div class="line">VBoxManage storagectl <span class="variable">$&#123;VMNAME&#125;</span> --name sata --add sata --portcount 2</div><div class="line"></div><div class="line"><span class="comment"># 2.3 挂载虚拟磁盘到虚拟机</span></div><div class="line">VBoxManage storageattach <span class="variable">$&#123;VMNAME&#125;</span> --storagectl sata --device 0 \</div><div class="line">--port 0 --<span class="built_in">type</span> hdd --medium <span class="string">"<span class="variable">$&#123;VMFOLDER&#125;</span>/<span class="variable">$&#123;VMNAME&#125;</span>/<span class="variable">$&#123;VMNAME&#125;</span>.vdi"</span></div><div class="line"></div><div class="line"></div><div class="line"><span class="comment"># 3、挂载iso（如果使用无人值守模式安装，则不需要手动去配置）</span></div><div class="line">VBoxManage storageattach <span class="variable">$&#123;VMNAME&#125;</span> --storagectl sata --device 0 \</div><div class="line">--port 1 --<span class="built_in">type</span> dvddrive --medium <span class="variable">$&#123;ISO&#125;</span></div><div class="line"></div><div class="line"><span class="comment"># 4、配置开机启动顺序</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --boot1 dvd --boot2 disk --boot3 none</div><div class="line"></div><div class="line"><span class="comment"># 5、配置最大内存和CPU</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --memory 1024 --cpus 1 --cpuexecutioncap 50</div><div class="line"></div><div class="line"><span class="comment"># 6、删除不需要的硬件</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --audio none --usb off --defaultfrontend headless</div><div class="line"></div><div class="line"><span class="comment"># 7、网络设置</span></div><div class="line"><span class="comment"># 7.1 创建一个限速组，只能限制虚拟机的发送带宽（通过延迟发送），不能限制接收带宽。</span></div><div class="line">VBoxManage bandwidthctl <span class="variable">$&#123;VMNAME&#125;</span> add Limit --<span class="built_in">type</span> network --<span class="built_in">limit</span> 1m</div><div class="line"></div><div class="line"><span class="comment"># 7.2 将网卡加入到限速组</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --nicbandwidthgroup1 Limit</div><div class="line"></div><div class="line"><span class="comment"># 7.3 修改网卡类型</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --nictype1 virtio</div><div class="line"></div><div class="line"><span class="comment"># 8、配置端口转发，可以配置主机IP为127.0.0.1，这样就只有127.0.0.1的端口做转发</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --natpf1 <span class="string">",tcp,,2222,,22"</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --natpf1 <span class="string">",tcp,,8080,,80"</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --natpf1 <span class="string">",tcp,,10443,,443"</span></div><div class="line"></div><div class="line"><span class="comment"># 9、安装系统</span></div><div class="line">VboxManage startvm <span class="variable">$&#123;VMNAME&#125;</span> --<span class="built_in">type</span> headless</div><div class="line"></div><div class="line"><span class="comment"># 无人值守安装，报错 VERR_OUT_OF_RANGE</span></div><div class="line"><span class="comment"># VBoxManage unattended install $&#123;VMNAME&#125; --package-selection-adjustment=minimal\</span></div><div class="line">--start-vm=headless --iso <span class="variable">$&#123;ISO&#125;</span></div><div class="line"></div><div class="line"><span class="comment"># 10、用如下方式如检测系统是否正常启动了</span></div><div class="line">ssh -o ConnectTimeout=300 -o ConnectionAttempts=1 root@127.0.0.1 -p 2222 \</div><div class="line">-o PasswordAuthentication=no</div></pre></td></tr></table></figure>
+<p>创建的虚拟机可以使用<code>--basefolder</code> 指明创建的虚拟机配置存放目录，注意如果指定了这个，那么后面<code>modifyvm --name</code>只会更改文件夹名，而不会去更改配置文件名称了。</p>
+<p><code>--ostype</code>后面的参数来源于下面的ID：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">ᐅ vbm list ostypes | grep <span class="string">"ID:"</span> | grep -v <span class="string">"Family"</span></div><div class="line">...</div><div class="line">ID:          RedHat_64</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>另外上面第十步，<code>ConnectTimeout</code>是超时时长，实际过程中应该是开启循环做检测。因为是通过端口转发的方式来检测，所以这里要检测准发目标<code>22</code>端口是否能正常<code>ssh</code>到，而不是检查<code>2222</code>端口是否已开启监听。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment"># 虚拟机还未poweron，这时候2222端口还未开启监听</span></div><div class="line">ᐅ ssh -o ConnectTimeout=300 -o ConnectionAttempts=1 root@127.0.0.1 -p 2222 -o PasswordAuthentication=no</div><div class="line">ssh: connect to host 127.0.0.1 port 2222: Connection refused</div><div class="line"></div><div class="line"><span class="comment"># 超时</span></div><div class="line">ᐅ ssh -o ConnectTimeout=3 -o ConnectionAttempts=1 root@127.0.0.1 -p 2222 -o PasswordAuthentication=no</div><div class="line">ssh: connect to host 127.0.0.1 port 2222: Operation timed out</div><div class="line"></div><div class="line"><span class="comment"># 虚拟机poweron后，启动过程中，会卡主，等待超时或者可以连上。</span></div><div class="line">ᐅ ssh -o ConnectTimeout=300 -o ConnectionAttempts=1 root@127.0.0.1 -p 2222 -o PasswordAuthentication=no</div><div class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</div><div class="line">@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @</div><div class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</div><div class="line">IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!</div><div class="line">Someone could be eavesdropping on you right now (man-in-the-middle attack)!</div><div class="line">It is also possible that a host key has just been changed.</div><div class="line">The fingerprint <span class="keyword">for</span> the RSA key sent by the remote host is</div><div class="line">SHA256:xB74ECrTYkTDwGIpUWjnwb2PlJrliHenliYdHd2F6ng.</div><div class="line">Please contact your system administrator.</div><div class="line">Add correct host key <span class="keyword">in</span> /Users/danny/.ssh/known_hosts to get rid of this message.</div><div class="line">Offending RSA key <span class="keyword">in</span> /Users/danny/.ssh/known_hosts:29</div><div class="line">Keyboard-interactive authentication is disabled to avoid man-in-the-middle attacks.</div><div class="line">root@127.0.0.1: Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password).</div></pre></td></tr></table></figure>
+<h4 id="限制带宽"><a href="#限制带宽" class="headerlink" title="限制带宽"></a>限制带宽</h4><p><a href="https://www.virtualbox.org/manual/ch06.html#network_bandwidth_limit" target="_blank" rel="external">https://www.virtualbox.org/manual/ch06.html#network_bandwidth_limit</a></p>
+<p>只能限制虚拟机的发送带宽（通过延迟发送），不能限制接收带宽。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 创建一个名为"Limit"的限制组，限速为20Mbit/s</span></div><div class="line">VBoxManage bandwidthctl <span class="string">"test"</span> add Limit --<span class="built_in">type</span> network --<span class="built_in">limit</span> 20m</div><div class="line"></div><div class="line"><span class="comment"># 将网卡1和网卡2加入到限制组。这样网卡1和网卡2的总带宽之和不能超过20Mbit/s</span></div><div class="line">VBoxManage modifyvm <span class="string">"test"</span> --nicbandwidthgroup1 Limit</div><div class="line">VBoxManage modifyvm <span class="string">"test"</span> --nicbandwidthgroup2 Limit</div><div class="line"></div><div class="line"><span class="comment"># VM运行过程中可以直接修改限制，立刻生效</span></div><div class="line">VBoxManage bandwidthctl <span class="string">"test"</span> <span class="built_in">set</span> Limit --<span class="built_in">limit</span> 100k</div><div class="line"></div><div class="line"><span class="comment"># 还可以完全禁用网卡带宽（即不允许发送）</span></div><div class="line">VBoxManage modifyvm <span class="string">"test"</span> --nicbandwidthgroup1 none</div><div class="line"></div><div class="line"><span class="comment"># 或者直接设置某个组的网卡都不能用</span></div><div class="line">VBoxManage bandwidthctl <span class="string">"test"</span> <span class="built_in">set</span> Limit --<span class="built_in">limit</span> 0</div></pre></td></tr></table></figure>
+<h4 id="配置端口转发"><a href="#配置端口转发" class="headerlink" title="配置端口转发"></a>配置端口转发</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment"># 给网卡nat网卡1配置一个端口转发，对应的参数字符串格式为:</span></div><div class="line"><span class="comment"># "名称，协议(必须，TCP或者UDP），主机iP，主机端口，虚拟机IP，虚拟机端口"</span></div><div class="line">VBoxManage modifyvm <span class="string">"VM name"</span> --natpf1 <span class="string">"guestssh,tcp,,2222,,22"</span></div><div class="line"></div><div class="line"><span class="comment"># 如果虚拟机的NAT连接网卡不是以DHCP获取IP，那么得显示指定IP才能做端口转发</span></div></pre></td></tr></table></figure>
+<h4 id="删除音频设备"><a href="#删除音频设备" class="headerlink" title="删除音频设备"></a>删除音频设备</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">VboxManage modifyvm <span class="built_in">test</span> --audio none</div></pre></td></tr></table></figure>
+<h4 id="存储控制器"><a href="#存储控制器" class="headerlink" title="存储控制器"></a>存储控制器</h4><p>增加一个stata硬盘和一个ide光驱：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">VboxManage storagectl <span class="built_in">test</span> --name sata --add sata --portcount 1</div><div class="line">VboxManage storagectl <span class="built_in">test</span> vm_noostype --name ide --add ide</div></pre></td></tr></table></figure>
+<h4 id="挂载介质"><a href="#挂载介质" class="headerlink" title="挂载介质"></a>挂载介质</h4><p>挂载ISO：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">VboxManage storageattach <span class="built_in">test</span> --storagectl ide --port 1 --device 1 --<span class="built_in">type</span> dvddrive --medium /Users/danny/csxy/机器初始化/1系统镜像/centos6.7-2.6.32-573-strong10-20160722-x86_64.iso</div></pre></td></tr></table></figure>
+<p>创建虚拟硬盘，分配动态大小，最大25GB：</p>
+<p>[–variant Standard,Fixed,Split2G,Stream,ESX]<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">BoxManage createmedium disk --filename <span class="string">"/Users/danny/VirtualBox VMs/test/test.vdi"</span> --format VDI --size 25600 --variant Standard</div><div class="line"></div><div class="line">VBoxManage storageattach <span class="built_in">test</span> --storagectl sata --port 0 --device 0 --<span class="built_in">type</span> hdd --medium <span class="string">"/Users/danny/VirtualBox VMs/test/test.vdi"</span></div></pre></td></tr></table></figure></p>
+<h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">VboxManage startvm <span class="built_in">test</span> --<span class="built_in">type</span> headless</div></pre></td></tr></table></figure>
+<p><strong>我们的目的肯定是在无GUI环境下装好，但是无GUI环境下我们怎么知道系统安装完成了呢？还有如果ISO提供的是交互式安装的模式的怎么办？</strong></p>
+<p>VboxManage提供了一种无人值守模式的安装，使用这种模式的时候都无需挂载IDE光驱，测试发现这种模式可以正常安装交互模式的ISO，但是无法安装自己打包出的快速安装的ISO。并且交互模式的ISO安装完成后，网卡配置文件中的<code>onboot=no</code>，即不是自动启动的，需要进入后修改成<code>yes</code>然后重启网络服务。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">VBoxManage unattended install <span class="built_in">test</span> --iso /Users/danny/csxy/机器初始化/1系统镜像/centos6.7-2.6.32-573-strong10-20160722-x86_64.iso   --user=root --password=a ----package-selection-adjustment=minimal start-vm=headless</div></pre></td></tr></table></figure>
+<h2 id="卸载"><a href="#卸载" class="headerlink" title="卸载"></a>卸载</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">VBoxManage unregistervm test --delete</div></pre></td></tr></table></figure>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>每次需要使用的时候，都重新从iso去进行安装，然后等待安装完成，还得进入VM系统内进行配置，这个过程可重用性很低，而且耗时间。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/virtualbox/" rel="tag"># virtualbox</a>
+          
+            <a href="/tags/vm/" rel="tag"># vm</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/27/environmental-isolation-2-docker-iso-make/" rel="next" title="环境隔离方案探索（二）、docker镜像制作">
+                <i class="fa fa-chevron-left"></i> 环境隔离方案探索（二）、docker镜像制作
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/27/environmental-isolation-4-virtualbox/" rel="prev" title="环境隔离方案探索（四）、virtualbox重用">
+                环境隔离方案探索（四）、virtualbox重用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="uyan_frame"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/avatar.gif"
+                alt="单调" />
+            
+              <p class="site-author-name" itemprop="name">单调</p>
+              <p class="site-description motion-element" itemprop="description">谁能够划船不用浆</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#VirtualBox"><span class="nav-number">1.</span> <span class="nav-text">VirtualBox</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建vm"><span class="nav-number">1.2.</span> <span class="nav-text">创建vm</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#限制带宽"><span class="nav-number">1.2.0.1.</span> <span class="nav-text">限制带宽</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置端口转发"><span class="nav-number">1.2.0.2.</span> <span class="nav-text">配置端口转发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#删除音频设备"><span class="nav-number">1.2.0.3.</span> <span class="nav-text">删除音频设备</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#存储控制器"><span class="nav-number">1.2.0.4.</span> <span class="nav-text">存储控制器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#挂载介质"><span class="nav-number">1.2.0.5.</span> <span class="nav-text">挂载介质</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动"><span class="nav-number">1.3.</span> <span class="nav-text">启动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#卸载"><span class="nav-number">1.4.</span> <span class="nav-text">卸载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题"><span class="nav-number">1.5.</span> <span class="nav-text">问题</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">单调</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=64776956";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2041358"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

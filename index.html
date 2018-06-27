@@ -204,21 +204,11 @@
       
         
         <li class="menu-item menu-item-home">
-          <a href="/" rel="section">
+          <a href="/archives/" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
             首页
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-archives">
-          <a href="/archives/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
-            
-            归档
           </a>
         </li>
       
@@ -271,6 +261,1720 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2018/06/27/environmental-isolation-kvm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/27/environmental-isolation-kvm/" itemprop="url">环境隔离方案设计之kvm</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-27T11:28:00+08:00">
+                2018-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="环境检查"><a href="#环境检查" class="headerlink" title="环境检查"></a>环境检查</h1><h3 id="检查启动了KVM"><a href="#检查启动了KVM" class="headerlink" title="检查启动了KVM"></a>检查启动了KVM</h3><ol>
+<li><p>检查操作系统内核<br> 低于2.6.20，则不支持kvm。</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># uname -r</span></div><div class="line">2.6.32-696.el6.x86_64</div></pre></td></tr></table></figure>
+</li>
+<li><p>检查CPU是否支持虚拟化</p>
+<p> Linux系统中，可以通过检查<code>/proc/cpuinfo</code>文件中的CPU特性标志来查看CPU目前是否支持硬件虚拟化，在x86和x86-64平台中，Intel系列的CPU支持虚拟化标志位”vmx”，AMD 系列CPU标志位”svm”，所以可以用如下命令查看CPU是否支持虚拟化（输出结果大于0则表示支持）：</p>
+<p> 检查intel的cpu是否支持虚拟化:</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># egrep -c 'vmx' /proc/cpuinfo</span></div><div class="line">16</div></pre></td></tr></table></figure>
+<p> 检查amd的cpu是否支持虚拟化:</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># egrep -c 'svm' /proc/cpuinfo</span></div><div class="line">0</div></pre></td></tr></table></figure>
+</li>
+<li><p>检查biso是否开启了虚拟化</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># dmesg | grep kvm</span></div><div class="line">kvm: VM_EXIT_LOAD_IA32_PERF_GLOBAL_CTRL does not work properly. Using workaround</div><div class="line">kvm: 12778: cpu0 disabled perfctr wrmsr: 0xc1 data 0xabcd</div><div class="line">kvm: 12848: cpu0 disabled perfctr wrmsr: 0xc1 data 0xabcd</div><div class="line">kvm: 12956: cpu0 disabled perfctr wrmsr: 0xc2 data 0xffff</div><div class="line">kvm: 15998: cpu0 disabled perfctr wrmsr: 0xc1 data 0xabcd</div><div class="line">kvm: 17939: cpu0 disabled perfctr wrmsr: 0xc1 data 0xabcd</div><div class="line">kvm: 18103: cpu0 disabled perfctr wrmsr: 0xc2 data 0xffff</div><div class="line">kvm: 18613: cpu0 disabled perfctr wrmsr: 0xc2 data 0xffff</div><div class="line">kvm: 18613: cpu0 disabled perfctr wrmsr: 0xc2 data 0xffff</div><div class="line">kvm: 18858: cpu0 disabled perfctr wrmsr: 0xc2 data 0xffff</div><div class="line">kvm: 18858: cpu0 disabled perfctr wrmsr: 0xc2 data 0xffff</div><div class="line">kvm: 19274: cpu0 disabled perfctr wrmsr: 0xc2 data 0xffff</div><div class="line">kvm: 19450: cpu0 disabled perfctr wrmsr: 0xc2 data 0xffff</div><div class="line">kvm: 25970: cpu0 disabled perfctr wrmsr: 0xc2 data 0xffff</div><div class="line">kvm: 26176: cpu0 disabled perfctr wrmsr: 0xc2 data 0xffff</div></pre></td></tr></table></figure>
+</li>
+<li><p>检查kvm模块是否已经加载</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># lsmod | grep kvm</span></div><div class="line">kvm_intel              55432  6</div><div class="line">kvm                   346318  1 kvm_intel</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<pre><code>如果没有加载，则尝试加载：
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># modprobe kvm</span></div><div class="line">[root@host3 ~]<span class="comment"># modprobe kvm-intel  （如果是AMD的CPU，则对应的是kvm-amd)</span></div></pre></td></tr></table></figure>
+</code></pre><h3 id="安装QEMU"><a href="#安装QEMU" class="headerlink" title="安装QEMU"></a>安装QEMU</h3><p>注意，linux下QEMU的安装包名为<code>qemu-kvm</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># yum info qemu-kvm</span></div><div class="line">已加载插件：fastestmirror, security</div><div class="line">Loading mirror speeds from cached hostfile</div><div class="line"> * base: mirrors.aliyun.com</div><div class="line"> * epel: mirrors.aliyun.com</div><div class="line"> * extras: mirrors.cn99.com</div><div class="line"> * updates: mirrors.aliyun.com</div><div class="line">已安装的软件包</div><div class="line">Name        : qemu-kvm</div><div class="line">Arch        : x86_64</div><div class="line">Epoch       : 2</div><div class="line">Version     : 0.12.1.2</div><div class="line">Release     : 2.503.el6_9.4</div><div class="line">Size        : 4.6 M</div><div class="line">Repo        : installed</div><div class="line">From repo   : updates</div><div class="line">Summary     : Userspace component of KVM</div><div class="line">URL         : http://www.linux-kvm.org</div><div class="line">License     : GPLv2+ and LGPLv2+ and BSD</div><div class="line">Description : KVM (<span class="keyword">for</span> Kernel-based Virtual Machine) is a full virtualization solution</div><div class="line">            : <span class="keyword">for</span> Linux on x86 hardware.</div><div class="line">            :</div><div class="line">            : Using KVM, one can run multiple virtual machines running unmodified Linux</div><div class="line">            : or Windows images. Each virtual machine has private virtualized hardware:</div><div class="line">            : a network card, disk, graphics adapter, etc.</div><div class="line"></div><div class="line">[root@host3 ~]<span class="comment"># /usr/libexec/qemu-kvm --version</span></div><div class="line">QEMU PC emulator version 0.12.1 (qemu-kvm-0.12.1.2-2.503.el6_9.4), Copyright (c) 2003-2008 Fabrice Bellard</div></pre></td></tr></table></figure>
+<h3 id="安装libvirt"><a href="#安装libvirt" class="headerlink" title="安装libvirt"></a>安装libvirt</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># yum install -y libvirt</span></div><div class="line">已加载插件：fastestmirror, security</div><div class="line">设置安装进程</div><div class="line">Loading mirror speeds from cached hostfile</div><div class="line"> * base: mirrors.aliyun.com</div><div class="line"> * epel: mirrors.aliyun.com</div><div class="line"> * extras: mirrors.cn99.com</div><div class="line"> * updates: mirrors.aliyun.com</div><div class="line">包 libvirt-0.10.2-62.el6_9.1.x86_64 已安装并且是最新版本</div><div class="line">无须任何处理</div><div class="line"></div><div class="line">[root@host3 ~]<span class="comment"># libvirtd --version</span></div><div class="line">libvirtd (libvirt) 0.10.2</div></pre></td></tr></table></figure>
+<h3 id="确保libvirtd启动"><a href="#确保libvirtd启动" class="headerlink" title="确保libvirtd启动"></a>确保libvirtd启动</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># service libvirtd status</span></div><div class="line">libvirtd (pid  26075) is running...</div></pre></td></tr></table></figure>
+<p>启动方式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># service libvirtd start</span></div></pre></td></tr></table></figure>
+<h3 id="virsh-介绍"><a href="#virsh-介绍" class="headerlink" title="virsh 介绍"></a>virsh 介绍</h3><p>virsh 是libvirt自带的命令行工具，实质是对所有的API功能进行了封装，方便使用。</p>
+<h1 id="虚拟机环境准备"><a href="#虚拟机环境准备" class="headerlink" title="虚拟机环境准备"></a>虚拟机环境准备</h1><h3 id="虚拟磁盘"><a href="#虚拟磁盘" class="headerlink" title="虚拟磁盘"></a>虚拟磁盘</h3><p>预先提供好的虚拟磁盘文件，内含操作系统，这里举例为<code>test.qcow2</code>。</p>
+<h3 id="虚拟机配置文件"><a href="#虚拟机配置文件" class="headerlink" title="虚拟机配置文件"></a>虚拟机配置文件</h3><p>预先提供好的虚拟机配置文件，该配置文件内尽量存放好通用的配置：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">domain</span> <span class="attr">type</span>=<span class="string">'kvm'</span>&gt;</span></div><div class="line">    <span class="comment">&lt;!-- name、memory、vcpu为要修改的地方 --&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>test<span class="tag">&lt;/<span class="name">name</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">memory</span> <span class="attr">unit</span>=<span class="string">'KiB'</span>&gt;</span>524288<span class="tag">&lt;/<span class="name">memory</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">vcpu</span> <span class="attr">placement</span>=<span class="string">'static'</span>&gt;</span>1<span class="tag">&lt;/<span class="name">vcpu</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">os</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">type</span> <span class="attr">arch</span>=<span class="string">'x86_64'</span> &gt;</span>hvm<span class="tag">&lt;/<span class="name">type</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">boot</span> <span class="attr">dev</span>=<span class="string">'hd'</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">os</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">features</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">acpi</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">features</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">clock</span> <span class="attr">offset</span>=<span class="string">'utc'</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">on_poweroff</span>&gt;</span>destroy<span class="tag">&lt;/<span class="name">on_poweroff</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">on_reboot</span>&gt;</span>restart<span class="tag">&lt;/<span class="name">on_reboot</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">on_crash</span>&gt;</span>restart<span class="tag">&lt;/<span class="name">on_crash</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">devices</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">emulator</span>&gt;</span>/usr/libexec/qemu-kvm<span class="tag">&lt;/<span class="name">emulator</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">disk</span> <span class="attr">type</span>=<span class="string">'file'</span> <span class="attr">device</span>=<span class="string">'disk'</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">driver</span> <span class="attr">name</span>=<span class="string">'qemu'</span> <span class="attr">type</span>=<span class="string">'qcow2'</span> <span class="attr">cache</span>=<span class="string">'none'</span>/&gt;</span></div><div class="line">            <span class="comment">&lt;!-- 磁盘虚拟磁盘的存放位置 --&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">source</span> <span class="attr">file</span>=<span class="string">'/home/danny/images/test.qcow2'</span>/&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">target</span> <span class="attr">dev</span>=<span class="string">'vda'</span> <span class="attr">bus</span>=<span class="string">'virtio'</span> /&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">disk</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">interface</span> <span class="attr">type</span>=<span class="string">'network'</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">source</span> <span class="attr">network</span>=<span class="string">'default'</span>/&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">interface</span>&gt;</span></div><div class="line">        <span class="comment">&lt;!--graphics可以删除的，这里方便远程使用vnc看实际的状态，记得修改IP--&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">graphics</span> <span class="attr">type</span>=<span class="string">'vnc'</span> <span class="attr">port</span>=<span class="string">'-1'</span> <span class="attr">autoport</span>=<span class="string">'yes'</span> <span class="attr">listen</span>=<span class="string">'192.168.1.12'</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">listen</span> <span class="attr">type</span>=<span class="string">'address'</span> <span class="attr">address</span>=<span class="string">'192.168.1.12'</span>/&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">graphics</span>&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">devices</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">domain</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>需要修改几个点：</p>
+<ol>
+<li>磁盘文件</li>
+<li>名字</li>
+<li>内存</li>
+<li>虚拟CPU个数</li>
+</ol>
+<p>这里假设该配置文件命名为<code>test.xml</code>，将虚拟机加入到libvirt管理中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@host3 qemu]<span class="comment"># virsh define test.xml</span></div><div class="line">定义域 <span class="built_in">test</span>（从 test.xml）</div></pre></td></tr></table></figure>
+<h3 id="为虚拟机绑定IP"><a href="#为虚拟机绑定IP" class="headerlink" title="为虚拟机绑定IP"></a>为虚拟机绑定IP</h3><ol>
+<li><p>停止默认虚拟网络</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@host3 qemu]<span class="comment"># virsh net-destroy default</span></div><div class="line">网络 default 被删除</div></pre></td></tr></table></figure>
+</li>
+<li><p>从libvirt管理的信息中获取分配的网卡mac地址</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">[root@host3 qemu]<span class="comment"># virsh dumpxml test</span></div><div class="line">&lt;domain <span class="built_in">type</span>=<span class="string">'kvm'</span>&gt;</div><div class="line">  &lt;name&gt;<span class="built_in">test</span>&lt;/name&gt;</div><div class="line">  &lt;uuid&gt;bf9e9ca1-48f7-a7e9-c582-5583603b0bab&lt;/uuid&gt;</div><div class="line">  &lt;memory unit=<span class="string">'KiB'</span>&gt;524288&lt;/memory&gt;</div><div class="line">  &lt;currentMemory unit=<span class="string">'KiB'</span>&gt;524288&lt;/currentMemory&gt;</div><div class="line">  &lt;vcpu placement=<span class="string">'static'</span>&gt;1&lt;/vcpu&gt;</div><div class="line">  &lt;os&gt;</div><div class="line">    &lt;<span class="built_in">type</span> arch=<span class="string">'x86_64'</span> machine=<span class="string">'rhel6.6.0'</span>&gt;hvm&lt;/<span class="built_in">type</span>&gt;</div><div class="line">    &lt;boot dev=<span class="string">'hd'</span>/&gt;</div><div class="line">  &lt;/os&gt;</div><div class="line">  &lt;features&gt;</div><div class="line">    &lt;acpi/&gt;</div><div class="line">  &lt;/features&gt;</div><div class="line">  &lt;clock offset=<span class="string">'utc'</span>/&gt;</div><div class="line">  &lt;on_poweroff&gt;destroy&lt;/on_poweroff&gt;</div><div class="line">  &lt;on_reboot&gt;restart&lt;/on_reboot&gt;</div><div class="line">  &lt;on_crash&gt;restart&lt;/on_crash&gt;</div><div class="line">  &lt;devices&gt;</div><div class="line">    &lt;emulator&gt;/usr/libexec/qemu-kvm&lt;/emulator&gt;</div><div class="line">    &lt;disk <span class="built_in">type</span>=<span class="string">'file'</span> device=<span class="string">'disk'</span>&gt;</div><div class="line">      &lt;driver name=<span class="string">'qemu'</span> <span class="built_in">type</span>=<span class="string">'qcow2'</span> cache=<span class="string">'none'</span>/&gt;</div><div class="line">      &lt;<span class="built_in">source</span> file=<span class="string">'/home/danny/images/test.qcow2'</span>/&gt;</div><div class="line">      &lt;target dev=<span class="string">'vda'</span> bus=<span class="string">'virtio'</span>/&gt;</div><div class="line">      &lt;address <span class="built_in">type</span>=<span class="string">'pci'</span> domain=<span class="string">'0x0000'</span> bus=<span class="string">'0x00'</span> slot=<span class="string">'0x04'</span> <span class="keyword">function</span>=<span class="string">'0x0'</span>/&gt;</div><div class="line">    &lt;/disk&gt;</div><div class="line">    &lt;controller <span class="built_in">type</span>=<span class="string">'usb'</span> index=<span class="string">'0'</span>&gt;</div><div class="line">      &lt;address <span class="built_in">type</span>=<span class="string">'pci'</span> domain=<span class="string">'0x0000'</span> bus=<span class="string">'0x00'</span> slot=<span class="string">'0x01'</span> <span class="keyword">function</span>=<span class="string">'0x2'</span>/&gt;</div><div class="line">    &lt;/controller&gt;</div><div class="line">    &lt;interface <span class="built_in">type</span>=<span class="string">'network'</span>&gt;</div><div class="line">      &lt;mac address=<span class="string">'52:54:00:c8:3e:ed'</span>/&gt;</div><div class="line">      &lt;<span class="built_in">source</span> network=<span class="string">'default'</span>/&gt;</div><div class="line">      &lt;address <span class="built_in">type</span>=<span class="string">'pci'</span> domain=<span class="string">'0x0000'</span> bus=<span class="string">'0x00'</span> slot=<span class="string">'0x03'</span> <span class="keyword">function</span>=<span class="string">'0x0'</span>/&gt;</div><div class="line">    &lt;/interface&gt;</div><div class="line">    &lt;input <span class="built_in">type</span>=<span class="string">'mouse'</span> bus=<span class="string">'ps2'</span>/&gt;</div><div class="line">    &lt;graphics <span class="built_in">type</span>=<span class="string">'vnc'</span> port=<span class="string">'-1'</span> autoport=<span class="string">'yes'</span> listen=<span class="string">'192.168.1.12'</span>&gt;</div><div class="line">      &lt;listen <span class="built_in">type</span>=<span class="string">'address'</span> address=<span class="string">'192.168.1.12'</span>/&gt;</div><div class="line">    &lt;/graphics&gt;</div><div class="line">    &lt;video&gt;</div><div class="line">      &lt;model <span class="built_in">type</span>=<span class="string">'cirrus'</span> vram=<span class="string">'9216'</span> heads=<span class="string">'1'</span>/&gt;</div><div class="line">      &lt;address <span class="built_in">type</span>=<span class="string">'pci'</span> domain=<span class="string">'0x0000'</span> bus=<span class="string">'0x00'</span> slot=<span class="string">'0x02'</span> <span class="keyword">function</span>=<span class="string">'0x0'</span>/&gt;</div><div class="line">    &lt;/video&gt;</div><div class="line">    &lt;memballoon model=<span class="string">'virtio'</span>&gt;</div><div class="line">      &lt;address <span class="built_in">type</span>=<span class="string">'pci'</span> domain=<span class="string">'0x0000'</span> bus=<span class="string">'0x00'</span> slot=<span class="string">'0x05'</span> <span class="keyword">function</span>=<span class="string">'0x0'</span>/&gt;</div><div class="line">    &lt;/memballoon&gt;</div><div class="line">  &lt;/devices&gt;</div><div class="line">&lt;/domain&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<pre><code>这里主要关注`domain/devices/interface/mac`的`address`：`52:54:00:c8:3e:ed`。
+</code></pre><ol>
+<li><p>在虚拟机网络的DHCP中进行绑定</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">[root@host3 qemu]<span class="comment"># virsh net-destroy default</span></div><div class="line">网络 default 被删除</div><div class="line"></div><div class="line">[root@host3 qemu]<span class="comment"># virsh net-dumpxml default</span></div><div class="line">&lt;network&gt;</div><div class="line">  &lt;name&gt;default&lt;/name&gt;</div><div class="line">  &lt;uuid&gt;69fe27f7-409c-41ba-98c9-8535917e6d31&lt;/uuid&gt;</div><div class="line">  &lt;forward mode=<span class="string">'nat'</span>/&gt;</div><div class="line">  &lt;bridge name=<span class="string">'virbr0'</span> stp=<span class="string">'on'</span> delay=<span class="string">'0'</span> /&gt;</div><div class="line">  &lt;mac address=<span class="string">'52:54:00:40:8F:28'</span>/&gt;</div><div class="line">  &lt;ip address=<span class="string">'192.168.122.1'</span> netmask=<span class="string">'255.255.255.0'</span>&gt;</div><div class="line">    &lt;dhcp&gt;</div><div class="line">      &lt;range start=<span class="string">'192.168.122.2'</span> end=<span class="string">'192.168.122.254'</span> /&gt;</div><div class="line">    &lt;/dhcp&gt;</div><div class="line">  &lt;/ip&gt;</div><div class="line">&lt;/network&gt;</div><div class="line"></div><div class="line">[root@host3 qemu]<span class="comment"># virsh net-edit default</span></div><div class="line">Network default XML configuration edited.</div><div class="line"></div><div class="line">[root@host3 qemu]<span class="comment"># virsh net-dumpxml default</span></div><div class="line">&lt;network&gt;</div><div class="line">  &lt;name&gt;default&lt;/name&gt;</div><div class="line">  &lt;uuid&gt;69fe27f7-409c-41ba-98c9-8535917e6d31&lt;/uuid&gt;</div><div class="line">  &lt;forward mode=<span class="string">'nat'</span>/&gt;</div><div class="line">  &lt;bridge name=<span class="string">'virbr0'</span> stp=<span class="string">'on'</span> delay=<span class="string">'0'</span> /&gt;</div><div class="line">  &lt;mac address=<span class="string">'52:54:00:40:8F:28'</span>/&gt;</div><div class="line">  &lt;ip address=<span class="string">'192.168.122.1'</span> netmask=<span class="string">'255.255.255.0'</span>&gt;</div><div class="line">    &lt;dhcp&gt;</div><div class="line">      &lt;range start=<span class="string">'192.168.122.2'</span> end=<span class="string">'192.168.122.254'</span> /&gt;</div><div class="line">      &lt;host mac=<span class="string">'52:54:00:c8:3e:ed'</span> ip=<span class="string">'192.168.122.111'</span> /&gt;</div><div class="line">    &lt;/dhcp&gt;</div><div class="line">  &lt;/ip&gt;</div><div class="line">&lt;/network&gt;</div><div class="line"></div><div class="line">[root@host3 qemu]<span class="comment"># virsh net-start default</span></div><div class="line">网络 default 已开始</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<pre><code>实际就是在`network/ip/dhcp`下加了`&lt;host mac=&apos;52:54:00:c8:3e:ed&apos; ip=&apos;192.168.122.111&apos; /&gt;`，注意这里的ip属性只能是dhcp的range内的ip。
+</code></pre><h3 id="增加端口映射hook脚本"><a href="#增加端口映射hook脚本" class="headerlink" title="增加端口映射hook脚本"></a>增加端口映射hook脚本</h3><p>hook脚本时libvirt在启动和停止虚拟机的时候，会去调用的脚本。调用脚本时传入的参数1为虚拟机在libvirt中的名字，参数2是当前执行的行为。</p>
+<p>下面以虚拟机test增加从主机<code>10022</code>端口映射到虚拟机端口<code>192.168.1.111:22</code>为例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># mkdir /etc/libvirt/hooks</span></div><div class="line">[root@host3 ~]<span class="comment"># cd /etc/libvirt/hooks</span></div><div class="line"></div><div class="line">[root@host3 hooks]<span class="comment"># vi qemu</span></div><div class="line">[root@host3 hooks]<span class="comment"># cat qemu</span></div><div class="line"><span class="meta">#!/bin/bash</span></div><div class="line">    </div><div class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$&#123;1&#125;</span>"</span> = <span class="string">"test"</span> ]; <span class="keyword">then</span></div><div class="line">	<span class="comment"># Update the following variables to fit your setup</span></div><div class="line">	GUEST_IP=192.168.122.111</div><div class="line">	GUEST_PORT=22</div><div class="line">	HOST_PORT=10022</div><div class="line">    </div><div class="line">	<span class="keyword">if</span> [ <span class="string">"<span class="variable">$&#123;2&#125;</span>"</span> = <span class="string">"stopped"</span> ] || [ <span class="string">"<span class="variable">$&#123;2&#125;</span>"</span> = <span class="string">"reconnect"</span> ]; <span class="keyword">then</span></div><div class="line">		/sbin/iptables -D FORWARD -o virbr0 -d  <span class="variable">$GUEST_IP</span> -j ACCEPT</div><div class="line">	    	/sbin/iptables -t nat -D PREROUTING -p tcp --dport <span class="variable">$HOST_PORT</span> -j DNAT --to <span class="variable">$GUEST_IP</span>:<span class="variable">$GUEST_PORT</span></div><div class="line">   	<span class="keyword">fi</span></div><div class="line">    </div><div class="line">	<span class="keyword">if</span> [ <span class="string">"<span class="variable">$&#123;2&#125;</span>"</span> = <span class="string">"start"</span> ] || [ <span class="string">"<span class="variable">$&#123;2&#125;</span>"</span> = <span class="string">"reconnect"</span> ]; <span class="keyword">then</span></div><div class="line">    		/sbin/iptables -I FORWARD -o virbr0 -d  <span class="variable">$GUEST_IP</span> -j ACCEPT</div><div class="line">	    	/sbin/iptables -t nat -I PREROUTING -p tcp --dport <span class="variable">$HOST_PORT</span> -j DNAT --to <span class="variable">$GUEST_IP</span>:<span class="variable">$GUEST_PORT</span></div><div class="line">	<span class="keyword">fi</span></div><div class="line"><span class="keyword">fi</span></div></pre></td></tr></table></figure>
+<p>接下来演示下对虚拟机做启动和停止操作，脚本是否生效：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">[root@host3 hooks]<span class="comment"># iptables -t nat -L</span></div><div class="line">Chain PREROUTING (policy ACCEPT)</div><div class="line">target     prot opt <span class="built_in">source</span>               destination</div><div class="line"></div><div class="line">Chain POSTROUTING (policy ACCEPT)</div><div class="line">target     prot opt <span class="built_in">source</span>               destination</div><div class="line"></div><div class="line">Chain OUTPUT (policy ACCEPT)</div><div class="line">target     prot opt <span class="built_in">source</span>               destination</div><div class="line"></div><div class="line">[root@host3 hooks]<span class="comment"># virsh start test</span></div><div class="line">域 <span class="built_in">test</span> 已开始</div><div class="line"></div><div class="line">[root@host3 hooks]<span class="comment"># iptables -t nat -L</span></div><div class="line">Chain PREROUTING (policy ACCEPT)</div><div class="line">target     prot opt <span class="built_in">source</span>               destination</div><div class="line">DNAT       tcp  --  anywhere             anywhere            tcp dpt:10022 to:192.168.122.111:22</div><div class="line"></div><div class="line">Chain POSTROUTING (policy ACCEPT)</div><div class="line">target     prot opt <span class="built_in">source</span>               destination</div><div class="line"></div><div class="line">Chain OUTPUT (policy ACCEPT)</div><div class="line">target     prot opt <span class="built_in">source</span>               destination</div><div class="line"></div><div class="line">[root@host3 hooks]<span class="comment"># virsh shutdown test</span></div><div class="line">域 <span class="built_in">test</span> 被关闭</div><div class="line"></div><div class="line"><span class="comment"># 这里等待几秒，等虚拟机真正停止</span></div><div class="line">[root@host3 hooks]<span class="comment"># iptables -t nat -L</span></div><div class="line">Chain PREROUTING (policy ACCEPT)</div><div class="line">target     prot opt <span class="built_in">source</span>               destination</div><div class="line"></div><div class="line">Chain POSTROUTING (policy ACCEPT)</div><div class="line">target     prot opt <span class="built_in">source</span>               destination</div><div class="line"></div><div class="line">Chain OUTPUT (policy ACCEPT)</div><div class="line">target     prot opt <span class="built_in">source</span>               destination</div></pre></td></tr></table></figure>
+<p>可以注意到，在虚拟机开始之后，iptables就被增加了端口映射，关闭后就被取消了。<strong>需要注意的是，只能在host外部去进行测试端口映射的效果，在host上是测试不出来的，因为不走iptables</strong>。</p>
+<h1 id="虚拟机启动和检测"><a href="#虚拟机启动和检测" class="headerlink" title="虚拟机启动和检测"></a>虚拟机启动和检测</h1><p>前面做了一系列准备，主要就是为了确保虚拟机启动后，从dhcp获取的ip是固定的ip。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">[root@host3 hooks]<span class="comment"># virsh start test</span></div><div class="line">域 <span class="built_in">test</span> 已开始</div><div class="line"></div><div class="line">[root@host3 hooks]<span class="comment"># ping 192.168.122.111</span></div><div class="line">PING 192.168.122.111 (192.168.122.111) 56(84) bytes of data.</div><div class="line">From 192.168.122.1 icmp_seq=19 Destination Host Unreachable</div><div class="line">From 192.168.122.1 icmp_seq=20 Destination Host Unreachable</div><div class="line">From 192.168.122.1 icmp_seq=21 Destination Host Unreachable</div><div class="line">64 bytes from 192.168.122.111: icmp_seq=22 ttl=64 time=0.387 ms</div><div class="line">64 bytes from 192.168.122.111: icmp_seq=23 ttl=64 time=0.396 ms</div><div class="line">64 bytes from 192.168.122.111: icmp_seq=24 ttl=64 time=0.422 ms</div></pre></td></tr></table></figure>
+<p>这时候实际可以从外网（宿主机外部的网络），访问宿主机的<code>10022</code>端口，来检查端口映射是否生效：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">ᐅ ssh root@192.168.1.12 -p 10022</div><div class="line">root@192.168.1.12<span class="string">'s password:</span></div><div class="line"><span class="string">Last login: Thu Mar  8 11:00:42 2018</span></div><div class="line"><span class="string">[root@c7mini ~]# ifconfig</span></div><div class="line"><span class="string">ens3: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span></div><div class="line"><span class="string">        inet 192.168.122.111  netmask 255.255.255.0  broadcast 192.168.122.255</span></div><div class="line"><span class="string">        inet6 fe80::109:d4ba:996b:8184  prefixlen 64  scopeid 0x20&lt;link&gt;</span></div><div class="line"><span class="string">        ether 52:54:00:c8:3e:ed  txqueuelen 1000  (Ethernet)</span></div><div class="line"><span class="string">        RX packets 52  bytes 6389 (6.2 KiB)</span></div><div class="line"><span class="string">        RX errors 0  dropped 0  overruns 0  frame 0</span></div><div class="line"><span class="string">        TX packets 50  bytes 6905 (6.7 KiB)</span></div><div class="line"><span class="string">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span></div><div class="line"><span class="string"></span></div><div class="line"><span class="string">lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536</span></div><div class="line"><span class="string">        inet 127.0.0.1  netmask 255.0.0.0</span></div><div class="line"><span class="string">        inet6 ::1  prefixlen 128  scopeid 0x10&lt;host&gt;</span></div><div class="line"><span class="string">        loop  txqueuelen 1  (Local Loopback)</span></div><div class="line"><span class="string">        RX packets 0  bytes 0 (0.0 B)</span></div><div class="line"><span class="string">        RX errors 0  dropped 0  overruns 0  frame 0</span></div><div class="line"><span class="string">        TX packets 0  bytes 0 (0.0 B)</span></div><div class="line"><span class="string">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span></div><div class="line"><span class="string">        </span></div><div class="line"><span class="string">[root@c7mini ~]# ping baidu.com</span></div><div class="line"><span class="string">PING baidu.com (111.13.101.208) 56(84) bytes of data.</span></div><div class="line"><span class="string">64 bytes from 111.13.101.208 (111.13.101.208): icmp_seq=1 ttl=49 time=31.3 ms</span></div><div class="line"><span class="string">64 bytes from 111.13.101.208 (111.13.101.208): icmp_seq=2 ttl=49 time=31.0 ms</span></div></pre></td></tr></table></figure>
+<p>需要注意的是，这里因为是增加了端口映射，所以会提示输出<code>root@192.168.1.12</code>的密码，实际内部要输入是虚拟机的密码。</p>
+<h1 id="虚拟机流量监控"><a href="#虚拟机流量监控" class="headerlink" title="虚拟机流量监控"></a>虚拟机流量监控</h1><p>首先获取虚拟机的虚拟机网卡名称<code>vnet1</code>，然后获取虚拟机网卡的状态即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># virsh domiflist test</span></div><div class="line">Interface  Type       Source     Model       MAC</div><div class="line">-------------------------------------------------------</div><div class="line">vnet1      network    default    -           52:54:00:c8:3e:ed</div><div class="line"></div><div class="line">[root@host3 ~]<span class="comment"># virsh domifstat test vnet1</span></div><div class="line">vnet1 rx_bytes 29329</div><div class="line">vnet1 rx_packets 422</div><div class="line">vnet1 rx_errs 0</div><div class="line">vnet1 rx_drop 0</div><div class="line">vnet1 tx_bytes 12351</div><div class="line">vnet1 tx_packets 93</div><div class="line">vnet1 tx_errs 0</div><div class="line">vnet1 tx_drop 0</div></pre></td></tr></table></figure>
+<p>其中，<code>tx_bytes</code>即为我们想得到的虚拟机的上行流量，<code>rx_bytes</code>即为我们想要的虚拟机下行流量。</p>
+<h1 id="动态修改虚拟机硬件资源"><a href="#动态修改虚拟机硬件资源" class="headerlink" title="动态修改虚拟机硬件资源"></a>动态修改虚拟机硬件资源</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">[root@host3 hooks]<span class="comment"># virsh dominfo test</span></div><div class="line">Id:             7</div><div class="line">名称：       <span class="built_in">test</span></div><div class="line">UUID:           bf9e9ca1-48f7-a7e9-c582-5583603b0bab</div><div class="line">OS 类型：    hvm</div><div class="line">状态：       running</div><div class="line">CPU：          1</div><div class="line">CPU 时间：   35.1s</div><div class="line">最大内存： 524288 KiB</div><div class="line">使用的内存： 524288 KiB</div><div class="line">Persistent:     yes</div><div class="line">自动启动： 禁用</div><div class="line">Managed save:   no</div><div class="line">安全性模式： selinux</div><div class="line">安全性 DOI： 0</div><div class="line">安全性标签： unconfined_u:unconfined_r:svirt_t:s0:c575,c610 (enforcing)</div></pre></td></tr></table></figure>
+<p>虚拟机运行过程中，去修改硬件资源，必须修改CPU、内存、硬盘等资源大小。</p>
+<h2 id="修改虚拟CPU个数"><a href="#修改虚拟CPU个数" class="headerlink" title="修改虚拟CPU个数"></a>修改虚拟CPU个数</h2><p>虚拟机内部看到的逻辑CPU个数，对应了domain/vcpus的配置，其中vcpu的值指定这个虚拟机最大的逻辑CPU个数，<code>current</code> 属性则用于指定实际提供使用的个数，如果想要不重启虚拟机就生效，可以预先设置足够大的CPU个数，然后调整实际使用的个数。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">vcpu</span> <span class="attr">placement</span>=<span class="string">'static'</span> <span class="attr">current</span>=<span class="string">'1'</span>&gt;</span>2<span class="tag">&lt;/<span class="name">vcpu</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>动态调整虚拟机逻辑CPU个数的方式，这个值不能超过上面设置的最大CPU数。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># virsh maxvcpus</span></div><div class="line">16</div><div class="line">[root@host3 ~]<span class="comment"># virsh setvcpus test 2</span></div></pre></td></tr></table></figure></p>
+<p>另外，根据命令说明，需要加上–config和–live来使得正在运行的虚拟机受到影响，并保存修改到xml中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">setvcpus domain count [--maximum] [[--config] [--live] | [--current]]</div></pre></td></tr></table></figure>
+<h3 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h3><p>为了方便动态调整逻辑CPU，可以考虑在启动虚拟机之前将最大值设置为<code>virsh maxvcpus</code>。初始状态设置<code>current</code>为最大值的一半。</p>
+<h2 id="修改内存"><a href="#修改内存" class="headerlink" title="修改内存"></a>修改内存</h2><p>内存的调整方案和CPU基本一致。也是有一个最大值和当前允许使用的值。其中<code>memory</code>中为最大值，<code>currentMemory</code>中为当前允许使用的值。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">memory</span> <span class="attr">unit</span>=<span class="string">'KiB'</span>&gt;</span>524288<span class="tag">&lt;/<span class="name">memory</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">currentMemory</span> <span class="attr">unit</span>=<span class="string">'KiB'</span>&gt;</span>512000<span class="tag">&lt;/<span class="name">currentMemory</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>动态调整当前使用值：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># virsh setmem test 256000</span></div></pre></td></tr></table></figure>
+<p>另外，根据命令说明，需要加上–config和–live来使得正在运行的虚拟机受到影响，并保存修改到xml中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">setmem domain size [[--config] [--live] | [--current]]</div></pre></td></tr></table></figure>
+<h3 id="方案-1"><a href="#方案-1" class="headerlink" title="方案"></a>方案</h3><p>为了方便动态调整允许内存使用浪，可以考虑在启动虚拟机之前设置成物理内存总量。初始状态设置为一半。</p>
+<h2 id="修改磁盘大小"><a href="#修改磁盘大小" class="headerlink" title="修改磁盘大小"></a>修改磁盘大小</h2><h3 id="filesystem-————-依赖于系统支持"><a href="#filesystem-————-依赖于系统支持" class="headerlink" title="filesystem  ———— 依赖于系统支持"></a>filesystem  ———— 依赖于系统支持</h3><p>尝试过使用<code>devices/filesystem</code> 来配置一个宿主机上的目录直接给虚拟机里面用，但是测试的机器不支持virtFs，所以无法使用这种方式。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">filesystem</span> <span class="attr">type</span>=<span class="string">'mount'</span> <span class="attr">accessmode</span>=<span class="string">'passthrough'</span>&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">source</span> <span class="attr">dir</span>=<span class="string">'/home/danny'</span>/&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">target</span> <span class="attr">dir</span>=<span class="string">'/danny'</span>/&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">address</span> <span class="attr">type</span>=<span class="string">'pci'</span> <span class="attr">domain</span>=<span class="string">'0x0000'</span> <span class="attr">bus</span>=<span class="string">'0x00'</span> <span class="attr">slot</span>=<span class="string">'0x06'</span> <span class="attr">function</span>=<span class="string">'0x0'</span>/&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">filesystem</span>&gt;</span></div></pre></td></tr></table></figure>
+<h3 id="qemu-img-————-需要在虚拟机内部挂载"><a href="#qemu-img-————-需要在虚拟机内部挂载" class="headerlink" title="qemu-img    ———— 需要在虚拟机内部挂载"></a>qemu-img    ———— 需要在虚拟机内部挂载</h3><p>使用<code>qemu-img resize</code>或者<code>virsh blockresize</code>对磁盘镜像文件进行resize，达到扩容的目的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">[root@host3 images]<span class="comment"># qemu-img info test.qcow2</span></div><div class="line">image: test.qcow2</div><div class="line">file format: qcow2</div><div class="line">virtual size: 8.0G (8589934592 bytes)</div><div class="line">disk size: 1.3G</div><div class="line">cluster_size: 65536</div><div class="line"></div><div class="line">[root@host3 images]<span class="comment"># qemu-img resize test.qcow2 +20G</span></div><div class="line">Image resized.</div><div class="line">[root@host3 images]<span class="comment"># qemu-img info test.qcow2</span></div><div class="line">image: test.qcow2</div><div class="line">file format: qcow2</div><div class="line">virtual size: 28G (30064771072 bytes)</div><div class="line">disk size: 1.3G</div><div class="line">cluster_size: 65536</div></pre></td></tr></table></figure>
+<p>扩容后的虚拟机，可以看到vda变成了28G，但是挂载的分许大小并没有变。需要到虚拟机内部去创建新分区才行。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[root@c7mini ~]<span class="comment"># lsblk</span></div><div class="line">NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT</div><div class="line">vda             252:0    0   28G  0 disk</div><div class="line">├─vda1          252:1    0    1G  0 part /boot</div><div class="line">└─vda2          252:2    0    7G  0 part</div><div class="line">  ├─centos-root 253:0    0  6.2G  0 lvm  /</div><div class="line">  └─centos-swap 253:1    0  820M  0 lvm  [SWAP]</div></pre></td></tr></table></figure></p>
+<h3 id="分配一个新的磁盘-————-需要虚拟机内部自己去挂载磁盘"><a href="#分配一个新的磁盘-————-需要虚拟机内部自己去挂载磁盘" class="headerlink" title="分配一个新的磁盘    ———— 需要虚拟机内部自己去挂载磁盘"></a>分配一个新的磁盘    ———— 需要虚拟机内部自己去挂载磁盘</h3><p>可以使用<code>qemu-img create</code>或者<code>virsh vol-create</code>创建一个新的磁盘，然后将磁盘加入到虚拟机中。</p>
+<p>创建磁盘：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[root@host3 images]<span class="comment"># qemu-img create -f qcow2 1gdata.qcow2 1g</span></div><div class="line">Formatting <span class="string">'1gdata.qcow2'</span>, fmt=qcow2 size=1073741824 encryption=off cluster_size=65536</div><div class="line">[root@host3 images]<span class="comment"># qemu-img info 1gdata.qcow2</span></div><div class="line">image: 1gdata.qcow2</div><div class="line">file format: qcow2</div><div class="line">virtual size: 1.0G (1073741824 bytes)</div><div class="line">disk size: 196K</div><div class="line">cluster_size: 65536</div></pre></td></tr></table></figure>
+<p>将配置加入到domain中：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;disk <span class="built_in">type</span>=<span class="string">'file'</span> device=<span class="string">'disk'</span>&gt;</div><div class="line">  &lt;driver name=<span class="string">'qemu'</span> <span class="built_in">type</span>=<span class="string">'qcow2'</span> cache=<span class="string">'none'</span>/&gt;</div><div class="line">  &lt;<span class="built_in">source</span> file=<span class="string">'/home/danny/images/1gdata.qcow2'</span>/&gt;</div><div class="line">  &lt;target dev=<span class="string">'vdc'</span> bus=<span class="string">'virtio'</span>/&gt;</div><div class="line">&lt;/disk&gt;</div></pre></td></tr></table></figure>
+<p>进入虚拟机中查看，可以看出是以独立磁盘的</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[root@c7mini ~]<span class="comment"># lsblk</span></div><div class="line">NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT</div><div class="line">vda             252:0    0   28G  0 disk</div><div class="line">├─vda1          252:1    0    1G  0 part /boot</div><div class="line">└─vda2          252:2    0    7G  0 part</div><div class="line">  ├─centos-root 253:0    0  6.2G  0 lvm  /</div><div class="line">  └─centos-swap 253:1    0  820M  0 lvm  [SWAP]</div><div class="line">vdb             252:16   0    1G  0 disk</div></pre></td></tr></table></figure>
+<h3 id="使用attach-disk-————-需要虚拟机内部自己挂载"><a href="#使用attach-disk-————-需要虚拟机内部自己挂载" class="headerlink" title="使用attach-disk   ———— 需要虚拟机内部自己挂载"></a>使用attach-disk   ———— 需要虚拟机内部自己挂载</h3><p>配合上面的使用<code>qemu-img create</code>或者<code>virsh vol-create</code>创建磁盘，然后使用<code>virsh attach-disk</code>，可以直接动态挂载一个磁盘到虚拟机中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[root@host3 ~]<span class="comment"># virsh attach-disk test /home/danny/images/1gdata.qcow2 vdb --driver qemu --subdriver qcow2 --config</span></div><div class="line">Disk attached successfully</div><div class="line"></div><div class="line"></div><div class="line">[root@host3 ~]<span class="comment"># virsh detach-disk test vdb --config</span></div><div class="line">Disk detached successfully</div></pre></td></tr></table></figure>
+<p>注意，<code>--driver</code>和<code>--subdriver</code>必须指定，否则虚拟机内部不会当成qcow2格式去处理，结果是无法识别正确的大小。<code>--config</code>则是指定将改动存储的domain的xml文件中去，永久生效。</p>
+<h3 id="方案-2"><a href="#方案-2" class="headerlink" title="方案"></a>方案</h3><p>优先考虑使用动态分配的方案，所以系统镜像尽量小，数据盘则等落地到宿主机之后才创建。根据宿主机空闲磁盘大小，创建一个1/2的虚拟磁盘给虚拟机使用。（目前创建qcow2这种动态大小的磁盘就行，后期进一步考虑创建固定大小的）。</p>
+<h1 id="卸载"><a href="#卸载" class="headerlink" title="卸载"></a>卸载</h1><h2 id="QEMU"><a href="#QEMU" class="headerlink" title="QEMU"></a>QEMU</h2><p>源码编译安装的qemu需要手动卸载：</p>
+<pre><code>可执行文件默认放在/usr/local/bin
+库文件默认存放在/usr/local/libexec
+配置文件默认存放在/usr/local/etc
+共享文件默认存放在/usr/local/share
+</code></pre><p>卸载源码只需将上面四个目录中相关文件或者目录删除：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># rm -rf /usr/local/bin/qemu-*</span></div><div class="line"><span class="comment"># rm -rf /usr/local/libexec/qemu-bridge-helper</span></div><div class="line"><span class="comment"># rm -rf /usr/local/etc/qemu</span></div><div class="line"><span class="comment"># rm -rf /usr/local/share/qemu</span></div></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2018/06/27/environmental-isolation-design-virtualbox/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/27/environmental-isolation-design-virtualbox/" itemprop="url">环境隔离方案设计之virtualbox</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-27T11:27:00+08:00">
+                2018-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h1><p>剥离VM的使用用途，仅管理VM本身。</p>
+<p>即，统一所有虚拟机的安装流程，而无需考虑这个VM具体给谁使用，怎么使用的问题。类似于云服务提供商的VPS，对于使用者而言，只要按照我们提供的使用方式连接使用即可。</p>
+<h1 id="要求"><a href="#要求" class="headerlink" title="要求"></a>要求</h1><p>想要所有的虚拟机安装过程统一，就得将变化因子参数化。目前想到的变化因子有：</p>
+<h2 id="端口映射关系"><a href="#端口映射关系" class="headerlink" title="端口映射关系"></a>端口映射关系</h2><p>因为VM是安装在host上的，所以host需要做跳板来提供VM对外的服务。比如VM的远程控制，Web服务等。所以就需要做端口映射，达到访问 host 的某个端口，实际在访问 guest 另一个端口的目的。</p>
+<h3 id="ssh端口"><a href="#ssh端口" class="headerlink" title="ssh端口"></a>ssh端口</h3><p>客户想要控制自己的虚拟机，至少得有ssh端口。所以 host 得为 vm 映射用于做远程控制的端口。我们默认 guest 的 sshd 服务端口是22, host 就得为 guest:22 端口绑定一个端口做映射， 并且这个端口要是外部可访问的。</p>
+<p>这里有两种方案，一种方案是要求 host 提供一批端口，在做绑定的时候随机取一个。 另一种方案就是固定一个端口，专门给 guest 做 ssh 访问使用。但是这两种方案实际上都暴露了这台机器的代理 ssh 端口。</p>
+<p>无论哪种方案，都必须让最终使用的客户知道这个端口号，才能让客户进行访问。</p>
+<h3 id="Web服务端口"><a href="#Web服务端口" class="headerlink" title="Web服务端口"></a>Web服务端口</h3><p>虚拟机对外提供服务，默认就是80/443。</p>
+<p>如果 host 只需要安装一个vm，并且没有其他服务需要使用80/443，则直接使用 host:80 =&gt; guest:80, host:443 =&gt; guest:443 即可。</p>
+<p>如果 host 想要能提供多个vm, 或者想要再挂接一层代理，则只能其他端口做映射绑定。 好在这批端口只需要 host 本机能访问即可，所以可以直接绑定在<code>127.0.0.1</code>上即可。</p>
+<p>这里需要设计一种方案，如何去分配端口做绑定，要考虑多个VM时怎么分配，比如从 62000~62500 范围依次尝试，记录下已经占用了的端口。</p>
+<h3 id="其他端口"><a href="#其他端口" class="headerlink" title="其他端口"></a>其他端口</h3><p>如果想要VM提供其他的服务，用其他的端口，这种情况 host 机器同样的为其做映射，但这时候得考虑外界怎么访问的问题，因为 host 所在机房的防火墙可能并未打开其他的端口供使用。</p>
+<h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><p>需要映射的端口实际分两类，一类是需要提供给外网访问的，一类是只需要本机能访问的。需要考虑的问题：</p>
+<ol>
+<li>对于需要提供给外网访问的功能，我们需要考虑 host 有没有开放相应的端口来提供服务。 </li>
+<li>客户的VM，默认映射出22、80、443三个端口，是否需要考虑可自定义</li>
+<li>如果需要nginx做代理来控制访问权限的话，也得考虑nginx能支持哪些协议的代理</li>
+</ol>
+<h2 id="资源分配"><a href="#资源分配" class="headerlink" title="资源分配"></a>资源分配</h2><p>需要协调客户对资源的需求，和用户节点提供的可使用资源，来进行资源分配。</p>
+<h3 id="CPU"><a href="#CPU" class="headerlink" title="CPU"></a>CPU</h3><p>设置成用户的最大限制即可，限制单位为，多少个物理核，每个核的使用量（百分比）。</p>
+<h3 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h3><p>设置成该用户允许的最大内存量即可。</p>
+<h3 id="磁盘"><a href="#磁盘" class="headerlink" title="磁盘"></a>磁盘</h3><p>根据用户允许的最大量，以及客户的VM需要使用的最小量，去匹配是否有合适的文件系统提供了足够的容量。</p>
+<h3 id="带宽"><a href="#带宽" class="headerlink" title="带宽"></a>带宽</h3><p>根据用户允许的最大带宽，限制VM的带宽即可。目前VM只支持对上行带宽做限制</p>
+<h2 id="VM的OVA设置"><a href="#VM的OVA设置" class="headerlink" title="VM的OVA设置"></a>VM的OVA设置</h2><p>OVA是指VM在virtualbox中安装完成之后使用其导出功能产生的文件，为了减少每次重新安装的耗时，所以采用此方式进行安装。</p>
+<h3 id="名称"><a href="#名称" class="headerlink" title="名称"></a>名称</h3><p>同一个节点上，安装多个VM时，不允许出现同名VM，所以在导出OVA之前，务必设置好独一无二的VM名称。</p>
+<h3 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h3><p>这里我们使用NAT网络为VM提供服务，所以VM内部的IP最好使用DHCP动态获取，至于客户的服务绑定端口时，为了避免IP变化产生问题，可以使用0.0.0.0做绑定。如果设置成静态的，则需要考虑如何为不同的客户分配静态IP的问题。</p>
+<h3 id="sshd服务"><a href="#sshd服务" class="headerlink" title="sshd服务"></a>sshd服务</h3><p>为了进行远程管控，必须安装完成后就能ssh连接上，所以必须自启动sshd服务，并提供服务的端口号。</p>
+<h3 id="磁盘-1"><a href="#磁盘-1" class="headerlink" title="磁盘"></a>磁盘</h3><p>磁盘使用系统盘+数据盘策略，导出ova的时候只携带系统盘，数据盘则由节点在安装的时候，动态挂载。</p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><ul>
+<li>为了减少安装时间，客户在提供ISO的时候，尽量提供最小需要的系统。</li>
+<li>为了避免重复安装软件，尽量在导出ova之前就将需要的软件全部安装完毕，提供一个开箱即可用的环境给客户使用。</li>
+</ul>
+<h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><p>需求中提出的几个问题，这里做下解答：</p>
+<ol>
+<li>ssh端口映射：选定10022端口作为对外的ssh端口，目前直接做映射，将来需要考虑映射多个虚拟机访问，则加代理。另外不考虑虚拟机更改ssh端口，默认就使用22，因为更改成其他的端口，没有意义，实际访问只能使用10022端口。</li>
+<li>服务端口：目前只考虑80和443端口提供的web服务，也是做直接映射，将来需要考虑映射多个虚拟机访问的，加代理。</li>
+</ol>
+<p>host:10022 -&gt; vm:22<br>host:80 -&gt; vm:80<br>host:443 -&gt; vm:443</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2018/06/27/environmental-isolation-6-libvirt-kvm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/27/environmental-isolation-6-libvirt-kvm/" itemprop="url">环境隔离方案探索（六）、libvirt&kvm</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-27T11:26:00+08:00">
+                2018-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="macos-安装-libvirt-及-libvirt-go"><a href="#macos-安装-libvirt-及-libvirt-go" class="headerlink" title="macos 安装 libvirt 及 libvirt-go"></a>macos 安装 libvirt 及 libvirt-go</h1><figure class="highlight routeros"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">brew install libvirt</div><div class="line"><span class="builtin-name">export</span> <span class="attribute">PKG_CONFIG_PATH</span>=/usr/local/Cellar/libvirt/3.10.0/lib/pkgconfig</div><div class="line">go <span class="builtin-name">get</span> github.com/libvirt/libvirt-go</div></pre></td></tr></table></figure>
+<h1 id="linux-安装-livirt"><a href="#linux-安装-livirt" class="headerlink" title="linux 安装 livirt"></a>linux 安装 livirt</h1><p>yum install -y libvirt libvirt-devel qemu-kvm </p>
+<p>service libvirtd start</p>
+<p>qemu:///session</p>
+<p>Linux系统中，可以通过检查<code>/proc/cpuinfo</code>文件中的CPU特性标志来查看CPU目前是否支持硬件虚拟化，在x86和x86-64平台中，Intel系列的CPU支持虚拟化标志位”vmx”，AMD 系列CPU标志位”svm”，所以可以用如下命令查看CPU是否支持虚拟化：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">grep -E <span class="string">'(vmx|svm)'</span> /proc/cpuinfo</div></pre></td></tr></table></figure>
+<p>lsmod | grep kvm</p>
+<p>modprobe kvm kvm-intel</p>
+<p>/usr/libexec/qemu-kvm</p>
+<h1 id="QEMU-QEMU-KVM-KVM-XEN-VirtualBox-libvirt"><a href="#QEMU-QEMU-KVM-KVM-XEN-VirtualBox-libvirt" class="headerlink" title="QEMU,QEMU-KVM,KVM,XEN,VirtualBox,libvirt"></a>QEMU,QEMU-KVM,KVM,XEN,VirtualBox,libvirt</h1><p>KVM和XEN是竞品，用于虚拟化硬件，XEN是半虚拟化（或者说准虚拟化，para-virtualization)，KVM是全虚拟化(full-virtualization)。因此KVM需要硬件支持，XEN不需要。KVM性能更高。</p>
+<p>QEMU是用户程序级别的虚拟化模拟器，其本身也是一个虚拟化软件，可以脱离KVM和XEN使用，也可以结合KVM和XEN一起使用，一起使用时，会优先使用KVM和XEN提供的虚拟化能力，剩余的采用自己的。</p>
+<p>QEMU-KVM是QEMU在linux下的安装包名称。</p>
+<p>VirtualBox是和QEMU一样的模拟器，在不同的平台上有不同的实现。</p>
+<p>libvirt是对QEMU、VirtualBox、VMWare这类产品API的封装，其提供了virt-install，virsh等命令行工具来方便虚拟机的安装等。</p>
+<h2 id="QEMU的安装"><a href="#QEMU的安装" class="headerlink" title="QEMU的安装"></a>QEMU的安装</h2><p><a href="https://www.qemu.org/download/#linux" target="_blank" rel="external">https://www.qemu.org/download/#linux</a></p>
+<h3 id="LINUX下"><a href="#LINUX下" class="headerlink" title="LINUX下"></a>LINUX下</h3><p>QEMU is packaged by most Linux distributions:</p>
+<ul>
+<li><p>Arch: pacman -S qemu</p>
+</li>
+<li><p>Debian/Ubuntu: apt-get install qemu</p>
+</li>
+<li><p>Fedora: dnf install @virtualization</p>
+</li>
+<li><p>Gentoo: emerge –ask app-emulation/qemu</p>
+</li>
+<li><p>RHEL/CentOS: yum install qemu-kvm</p>
+</li>
+<li><p>SUSE: zypper install qemu</p>
+</li>
+</ul>
+<h3 id="macOS下"><a href="#macOS下" class="headerlink" title="macOS下"></a>macOS下</h3><p>QEMU can be installed from Homebrew:</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">brew </span><span class="keyword">install </span>qemu</div></pre></td></tr></table></figure>
+<p>QEMU requires Mac OS X 10.5 or later, but it is recommended to use Mac OS X 10.7 or later.</p>
+<h1 id="VLAN网络模式探索"><a href="#VLAN网络模式探索" class="headerlink" title="VLAN网络模式探索"></a>VLAN网络模式探索</h1><h1 id="virsh"><a href="#virsh" class="headerlink" title="virsh"></a>virsh</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># virsh domifstat vm_name if_name     查询vm_name这个虚拟机的if_name网络接口状况</span></div><div class="line">virsh <span class="comment"># domiflist 1</span></div><div class="line">接口     类型     源        型号      MAC</div><div class="line">-------------------------------------------------------</div><div class="line">vnet0      network    default    virtio      52:54:00:e4:f8:c0</div><div class="line"></div><div class="line">virsh <span class="comment"># domifstat 1 vnet0</span></div><div class="line">vnet0 rx_bytes 456432</div><div class="line">vnet0 rx_packets 8698</div><div class="line">vnet0 rx_errs 0</div><div class="line">vnet0 rx_drop 0</div><div class="line">vnet0 tx_bytes 6458</div><div class="line">vnet0 tx_packets 45</div><div class="line">vnet0 tx_errs 0</div><div class="line">vnet0 tx_drop 0</div><div class="line"></div><div class="line"><span class="comment"># virsh domstate vm  也能显示出网卡出口流量</span></div><div class="line">virsh <span class="comment"># domstats 1</span></div><div class="line">Domain: <span class="string">'centos7.0'</span></div><div class="line">  state.state=1</div><div class="line">  state.reason=1</div><div class="line">  cpu.time=250075130705</div><div class="line">  cpu.user=26810000000</div><div class="line">  cpu.system=71080000000</div><div class="line">  balloon.current=524288</div><div class="line">  balloon.maximum=524288</div><div class="line">  balloon.swap_in=0</div><div class="line">  balloon.swap_out=0</div><div class="line">  balloon.major_fault=177</div><div class="line">  balloon.minor_fault=171273</div><div class="line">  balloon.unused=398856</div><div class="line">  balloon.available=500180</div><div class="line">  balloon.last-update=1519882249</div><div class="line">  balloon.rss=342640</div><div class="line">  vcpu.current=1</div><div class="line">  vcpu.maximum=1</div><div class="line">  vcpu.0.state=1</div><div class="line">  vcpu.0.time=78220000000</div><div class="line">  vcpu.0.wait=0</div><div class="line">  vcpu.0.halted=是</div><div class="line">  net.count=1</div><div class="line">  net.0.name=vnet0</div><div class="line">  net.0.rx.bytes=510552</div><div class="line">  net.0.rx.pkts=9728</div><div class="line">  net.0.rx.errs=0</div><div class="line">  net.0.rx.drop=0</div><div class="line">  net.0.tx.bytes=7226</div><div class="line">  net.0.tx.pkts=49</div><div class="line">  net.0.tx.errs=0</div><div class="line">  net.0.tx.drop=0</div><div class="line">  block.count=1</div><div class="line">  block.0.name=vda</div><div class="line">  block.0.path=/var/lib/libvirt/images/centos7.0.qcow2</div><div class="line">  block.0.rd.reqs=6915</div><div class="line">  block.0.rd.bytes=131828224</div><div class="line">  block.0.rd.times=6388244320</div><div class="line">  block.0.wr.reqs=1111</div><div class="line">  block.0.wr.bytes=17088512</div><div class="line">  block.0.wr.times=6475779725</div><div class="line">  block.0.fl.reqs=423</div><div class="line">  block.0.fl.times=417082331</div><div class="line">  block.0.allocation=3936853504</div><div class="line">  block.0.capacity=4294967296</div><div class="line">  block.0.physical=1710493696</div></pre></td></tr></table></figure>
+<h1 id="如何将拷贝下来的硬盘加入到卷中？"><a href="#如何将拷贝下来的硬盘加入到卷中？" class="headerlink" title="如何将拷贝下来的硬盘加入到卷中？"></a>如何将拷贝下来的硬盘加入到卷中？</h1><p>似乎必须携带xml文件，才能使用vol-create来创建一个？</p>
+<h1 id="如何固定虚拟机的IP"><a href="#如何固定虚拟机的IP" class="headerlink" title="如何固定虚拟机的IP"></a>如何固定虚拟机的IP</h1><p>可以通过<code>domifaddr domain</code> 获取</p>
+<h1 id="iptables关闭的情况下，虚拟机就无法上网"><a href="#iptables关闭的情况下，虚拟机就无法上网" class="headerlink" title="iptables关闭的情况下，虚拟机就无法上网"></a>iptables关闭的情况下，虚拟机就无法上网</h1><h1 id="QEMU-到-libvirt-命令的转换"><a href="#QEMU-到-libvirt-命令的转换" class="headerlink" title="QEMU 到 libvirt 命令的转换"></a>QEMU 到 libvirt 命令的转换</h1><p><a href="https://wiki.libvirt.org/page/QEMUSwitchToLibvirt" target="_blank" rel="external">https://wiki.libvirt.org/page/QEMUSwitchToLibvirt</a></p>
+<h1 id="Hypervisor-features"><a href="#Hypervisor-features" class="headerlink" title="Hypervisor features"></a>Hypervisor features</h1><p><strong>acpi</strong><br>    开启ACPI特性，可以在宿主机对虚拟机电源进行管理</p>
+<h1 id="多个虚拟机使用同一个系统镜像文件，会导致SSH不到先启动的那个，不知道什么原因。"><a href="#多个虚拟机使用同一个系统镜像文件，会导致SSH不到先启动的那个，不知道什么原因。" class="headerlink" title="多个虚拟机使用同一个系统镜像文件，会导致SSH不到先启动的那个，不知道什么原因。"></a>多个虚拟机使用同一个系统镜像文件，会导致SSH不到先启动的那个，不知道什么原因。</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[root@c7 networks]<span class="comment"># brctl show</span></div><div class="line">bridge name	    bridge id		         STP enabled     interfaces</div><div class="line">virbr0		    8000.5254006b491d      yes             virbr0-nic</div><div class="line">							                                   vnet0</div><div class="line">							                                   vnet1</div></pre></td></tr></table></figure>
+<h1 id="配置NAT网络"><a href="#配置NAT网络" class="headerlink" title="配置NAT网络"></a>配置NAT网络</h1><p>默认会有一个叫default的NAT虚拟网络，查看NAT网络：</p>
+<p>virsh net-list –all<br>如果要创建或者修改NAT网络，要先编辑default.xml：</p>
+<p>virsh net-edit default<br>重新加载和激活配置：</p>
+<p>virsh net-define /etc/libvirt/qemu/networks/default.xml<br>启动NAT网络：</p>
+<p>virsh net-start default<br>virsh net-autostart default<br>启动NAT后会自动生成一个虚拟桥接设备virbr0，并分配IP地址，查看状态：</p>
+<p>brctl show<br>正常情况下libirtd启动后就会启动virbr0,并自动添加IPtables规则来实现NAT,要保证打开ip_forward，在/etc/sysctl.conf中：</p>
+<p>net.ipv4.ip_forward = 1<br>sysctl -p<br>启动虚机并设置自动获取IP即可，如果想手动指定虚拟机IP，要注意配置的IP需在NAT网段内</p>
+<h1 id="问题记录"><a href="#问题记录" class="headerlink" title="问题记录"></a>问题记录</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[root@host3 danny]<span class="comment"># lsmod | grep kvm</span></div><div class="line">kvm                   346318  0</div><div class="line">[root@host3 danny]<span class="comment"># modprobe kvm-intel</span></div><div class="line">FATAL: Error inserting kvm_intel (/lib/modules/2.6.32-696.el6.x86_64/kernel/arch/x86/kvm/kvm-intel.ko): Operation not supported</div><div class="line">[root@host3 danny]<span class="comment"># dmesg|grep kvm</span></div><div class="line">kvm: disabled by bios</div><div class="line">kvm: disabled by bios</div><div class="line">kvm: disabled by bios</div></pre></td></tr></table></figure>
+<p>通过<code>dmesg|grep kvm</code>检查BISO是否开启虚拟化</p>
+<p>libvirt的qemu驱动如果要使用kvm全虚拟化，要确保<code>/usr/bin/qemu-kvm</code>文件和<code>/dev/kvm</code>设备存在。</p>
+<p>default network 启动失败</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">virsh <span class="comment"># net-start default</span></div><div class="line">错误：开始网络 default 失败</div><div class="line">错误：内部错误 Network is already <span class="keyword">in</span> use by interface virbr0</div><div class="line"></div><div class="line">$ sudo ifconfig virbr0 down</div><div class="line">$ sudo brctl delbr virbr0</div><div class="line"></div><div class="line">$ sudo virsh net-start default</div></pre></td></tr></table></figure>
+<h1 id="虚拟机创建"><a href="#虚拟机创建" class="headerlink" title="虚拟机创建"></a>虚拟机创建</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">virt-install --name c67 --ram 1024 --disk path=./c67.qcow2,size=40,sparse=<span class="literal">false</span> -v --accelerate --graphics vnc,listen=192.168.1.12 -c /home/danny/isos/centos6.7-2.6.32-573-strong10-20160722-x86_64.iso</div></pre></td></tr></table></figure>
+<h1 id="centos6-升级libvirt"><a href="#centos6-升级libvirt" class="headerlink" title="centos6 升级libvirt"></a>centos6 升级libvirt</h1><p>默认的mirrors带的版本都太低，很多新功能不支持，这里找到一个稍微高点版本的repos：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -o /etc/yum.repos.d/libvirt-1.2.21.repo https://copr.fedorainfracloud.org/coprs/mclarkson/libvirt-1.2.21/repo/epel-6/mclarkson-libvirt-1.2.21-epel-6.repo</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">yum remove libvirt-python       // 先删除这个，不然会升级失败，因为libvirt-python我们并没有升级，它依赖旧版本的libvirt.so</div><div class="line"></div><div class="line">yum install -y --nogpgcheck libvirt-1.2.21</div></pre></td></tr></table></figure>
+<p>yum groupinstall Virtualization “Virtualization Client”     “Virtualization Platform” “Virtualization Tools”</p>
+<h1 id="源码安装qemu"><a href="#源码安装qemu" class="headerlink" title="源码安装qemu"></a>源码安装qemu</h1><p>参考：</p>
+<ul>
+<li><a href="https://www.qemu.org/download/" target="_blank" rel="external">https://www.qemu.org/download/</a></li>
+<li><a href="https://wiki.qemu.org/Hosts/Linux#System_emulation" target="_blank" rel="external">https://wiki.qemu.org/Hosts/Linux#System_emulation</a></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line">yum install git glib2-devel libfdt-devel pixman-devel zlib-devel</div><div class="line"></div><div class="line">wget https://download.qemu.org/qemu-2.11.1.tar.xz</div><div class="line">tar xJf qemu-2.11.1.tar.xz</div><div class="line">d qemu-2.11.1</div><div class="line">./configure --target-list=x86_64-softmmu </div><div class="line">make -j 20</div><div class="line"></div><div class="line"></div><div class="line">[root@host3 qemu-2.11.1]<span class="comment"># make install</span></div><div class="line">mkdir -p dtc/libfdt</div><div class="line">mkdir -p dtc/tests</div><div class="line">	CHK version_gen.h</div><div class="line">make[1]: “/home/danny/packages/qemu-2.11.1/capstone/libcapstone.a”是最新的。</div><div class="line">install -d -m 0755 <span class="string">"/usr/local/share/qemu"</span></div><div class="line">install -d -m 0755 <span class="string">"/usr/local/var"</span>/run</div><div class="line">install -d -m 0755 <span class="string">"/usr/local/bin"</span></div><div class="line">install -c -m 0755 qemu-ga ivshmem-client ivshmem-server qemu-nbd qemu-img qemu-io  scsi/qemu-pr-helper <span class="string">"/usr/local/bin"</span></div><div class="line">strip <span class="string">"/usr/local/bin/qemu-ga"</span> <span class="string">"/usr/local/bin/ivshmem-client"</span> <span class="string">"/usr/local/bin/ivshmem-server"</span> <span class="string">"/usr/local/bin/qemu-nbd"</span> <span class="string">"/usr/local/bin/qemu-img"</span> <span class="string">"/usr/local/bin/qemu-io"</span> <span class="string">"/usr/local/bin/qemu-pr-helper"</span></div><div class="line">install -d -m 0755 <span class="string">"/usr/local/libexec"</span></div><div class="line">install -c -m 0755 qemu-bridge-helper <span class="string">"/usr/local/libexec"</span></div><div class="line">strip <span class="string">"/usr/local/libexec/qemu-bridge-helper"</span></div><div class="line"><span class="built_in">set</span> -e; <span class="keyword">for</span> x <span class="keyword">in</span> bios.bin bios-256k.bin sgabios.bin vgabios.bin vgabios-cirrus.bin vgabios-stdvga.bin vgabios-vmware.bin vgabios-qxl.bin vgabios-virtio.bin acpi-dsdt.aml ppc_rom.bin openbios-sparc32 openbios-sparc64 openbios-ppc QEMU,tcx.bin QEMU,cgthree.bin pxe-e1000.rom pxe-eepro100.rom pxe-ne2k_pci.rom pxe-pcnet.rom pxe-rtl8139.rom pxe-virtio.rom efi-e1000.rom efi-eepro100.rom efi-ne2k_pci.rom efi-pcnet.rom efi-rtl8139.rom efi-virtio.rom efi-e1000e.rom efi-vmxnet3.rom qemu-icon.bmp qemu_logo_no_text.svg bamboo.dtb petalogix-s3adsp1800.dtb petalogix-ml605.dtb multiboot.bin linuxboot.bin linuxboot_dma.bin kvmvapic.bin s390-ccw.img s390-netboot.img spapr-rtas.bin slof.bin skiboot.lid palcode-clipper u-boot.e500 qemu_vga.ndrv; <span class="keyword">do</span> \</div><div class="line">		install -c -m 0644 /home/danny/packages/qemu-2.11.1/pc-bios/<span class="variable">$x</span> <span class="string">"/usr/local/share/qemu"</span>; \</div><div class="line">	<span class="keyword">done</span></div><div class="line">install -d -m 0755 <span class="string">"/usr/local/share/qemu/keymaps"</span></div><div class="line"><span class="built_in">set</span> -e; <span class="keyword">for</span> x <span class="keyword">in</span> da     en-gb  et  fr     fr-ch  is  lt  modifiers  no  pt-br  sv ar      de     en-us  <span class="keyword">fi</span>  fr-be  hr     it  lv  nl         pl  ru     th common  de-ch  es     fo  fr-ca  hu     ja  mk  nl-be      pt  sl     tr bepo    cz; <span class="keyword">do</span> \</div><div class="line">		install -c -m 0644 /home/danny/packages/qemu-2.11.1/pc-bios/keymaps/<span class="variable">$x</span> <span class="string">"/usr/local/share/qemu/keymaps"</span>; \</div><div class="line">	<span class="keyword">done</span></div><div class="line">install -c -m 0644 /home/danny/packages/qemu-2.11.1/trace-events-all <span class="string">"/usr/local/share/qemu/trace-events-all"</span></div><div class="line"><span class="keyword">for</span> d <span class="keyword">in</span> x86_64-softmmu; <span class="keyword">do</span> \</div><div class="line">	make --no-print-directory BUILD_DIR=/home/danny/packages/qemu-2.11.1 TARGET_DIR=<span class="variable">$d</span>/ -C <span class="variable">$d</span> install || <span class="built_in">exit</span> 1 ; \</div><div class="line">        <span class="keyword">done</span></div><div class="line">install -d -m 0755 <span class="string">"/usr/local/bin"</span></div><div class="line">install -c -m 0755 qemu-system-x86_64  <span class="string">"/usr/local/bin"</span></div><div class="line">strip <span class="string">"/usr/local/bin/qemu-system-x86_64"</span></div><div class="line"></div><div class="line"></div><div class="line">ln -s /usr/<span class="built_in">local</span>/bin/qemu-system-x86_64 /usr/libexec/qemu-kvm</div><div class="line">ln -s /usr/<span class="built_in">local</span>/bin/qemu-system-x86_64 /usr/bin/qemu-kvm</div></pre></td></tr></table></figure>
+<p>(1) 源码编译安装的qemu需要手动卸载：</p>
+<p>可执行文件默认放在/usr/local/bin</p>
+<p>库文件默认存放在/usr/local/libexec<br>配置文件默认存放在/usr/local/etc<br>共享文件默认存放在/usr/local/share</p>
+<p>卸载源码只需将上面四个目录中相关文件或者目录删除</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">rm -rf <span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>qemu-*</div><div class="line">rm -rf <span class="regexp">/usr/</span>local<span class="regexp">/libexec/</span>qemu-bridge-helper</div><div class="line">rm -rf <span class="regexp">/usr/</span>local<span class="regexp">/etc/</span>qemu</div><div class="line">rm -rf <span class="regexp">/usr/</span>local<span class="regexp">/share/</span>qemu</div></pre></td></tr></table></figure>
+<h2 id="经测试，安装最新版本的会出现"><a href="#经测试，安装最新版本的会出现" class="headerlink" title="经测试，安装最新版本的会出现"></a>经测试，安装最新版本的会出现</h2><p>qemu_system_x86-64 无权限访问问题，我这里主要是需要查询虚拟机IP地址的接口，根据<code>https://libvirt.org/hvsupport.html#</code>可知virDomainInterfaceAddresses是从1.2.14版本开始支持的。我直接去安装1.3.1</p>
+<h1 id="virtualbox-安装"><a href="#virtualbox-安装" class="headerlink" title="virtualbox 安装"></a>virtualbox 安装</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">curl -o /etc/yum.repos.d/virtualbox.repo https://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo</div><div class="line"></div><div class="line">yum install -y virtualbox-4.3</div></pre></td></tr></table></figure>
+<h1 id="虚拟机IP获取方式"><a href="#虚拟机IP获取方式" class="headerlink" title="虚拟机IP获取方式"></a>虚拟机IP获取方式</h1><p>可以直接通过API<code>virDomainInterfaceAddresses</code>获取，但是这个接口在1.2.14版本开始才有效。    </p>
+<p>在centos7上，直接通过yum仓库安装的libvirt版本已经是3.2.0了，所以直接可以获取。</p>
+<p>但是在centos6.9上，从yum仓库安装的libvirt版本是0.10.0，不支持这个接口，所以需要尝试以下方式：</p>
+<h3 id="方式一：限制DHCP提供的IP范围只有一个"><a href="#方式一：限制DHCP提供的IP范围只有一个" class="headerlink" title="方式一：限制DHCP提供的IP范围只有一个"></a>方式一：限制DHCP提供的IP范围只有一个</h3><p>已经测试过，可以。</p>
+<h3 id="方式二：向DHCP服务中指定mac来绑定IP"><a href="#方式二：向DHCP服务中指定mac来绑定IP" class="headerlink" title="方式二：向DHCP服务中指定mac来绑定IP"></a>方式二：向DHCP服务中指定mac来绑定IP</h3><p><code>&lt;host mac=&quot;00:16:3e:3e:a9:1a&quot; name=&quot;bar.example.com&quot; ip=&quot;192.168.122.11&quot;/&gt;</code></p>
+<p>看文档是必须指定name属性，但是经测试似乎不需要。</p>
+<p>另外直接通过命令<code>virsh net-update default modify ip-dhcp-host &quot;&lt;host mac=&#39;52:54:00:0b:b5:ac&#39; ip=&#39;192.168.122.205&#39; /&gt;&quot; --live --config --current</code>去进行设置，也没能实时生效，所以最好是先设置好之后再启动虚拟机。</p>
+<h1 id="设置端口转发，让host外的网络可用直接访问虚拟机"><a href="#设置端口转发，让host外的网络可用直接访问虚拟机" class="headerlink" title="设置端口转发，让host外的网络可用直接访问虚拟机"></a>设置端口转发，让host外的网络可用直接访问虚拟机</h1><p><a href="https://wiki.libvirt.org/page/Networking#Forwarding_Incoming_Connections" target="_blank" rel="external">https://wiki.libvirt.org/page/Networking#Forwarding_Incoming_Connections</a></p>
+<p>通过启动libvirt为qemu准备的hook去向iptables中安装必要的转发规则，因为默认的NAT网络实际就是通过设置iptables来达到虚拟机可以访问外网，并且宿主机可以访问虚拟机的。</p>
+<h3 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h3><ol>
+<li>获取domain的名字（目的是能根据名字自动区分为哪个虚拟机设置端口转发）</li>
+<li>获取domain的IP（要保持不变）</li>
+<li>domain提供服务的端口</li>
+<li>host提供转发的端口</li>
+<li>停止domain</li>
+<li><p>创建 <code>/etc/libvirt/hooks/qemu</code>，或者使用如下脚本内容替换该文件，并增加执行权限。</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="meta">#!/bin/bash</span></div><div class="line"><span class="comment"># IMPORTANT: Change the "VM NAME" string to match your actual VM Name.</span></div><div class="line"><span class="comment"># In order to create rules to other VMs, just duplicate the below block and configure</span></div><div class="line"><span class="comment"># it accordingly.</span></div><div class="line"></div><div class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$&#123;1&#125;</span>"</span> = <span class="string">"VM NAME"</span> ]; <span class="keyword">then</span></div><div class="line">   <span class="comment"># Update the following variables to fit your setup</span></div><div class="line">   GUEST_IP=</div><div class="line">   GUEST_PORT=</div><div class="line">   HOST_PORT=</div><div class="line">    </div><div class="line">   <span class="keyword">if</span> [ <span class="string">"<span class="variable">$&#123;2&#125;</span>"</span> = <span class="string">"stopped"</span> ] || [ <span class="string">"<span class="variable">$&#123;2&#125;</span>"</span> = <span class="string">"reconnect"</span> ]; <span class="keyword">then</span></div><div class="line">	/sbin/iptables -D FORWARD -o virbr0 -d  <span class="variable">$GUEST_IP</span> -j ACCEPT</div><div class="line">	/sbin/iptables -t nat -D PREROUTING -p tcp --dport <span class="variable">$HOST_PORT</span> -j DNAT --to <span class="variable">$GUEST_IP</span>:<span class="variable">$GUEST_PORT</span></div><div class="line">   <span class="keyword">fi</span></div><div class="line">   <span class="keyword">if</span> [ <span class="string">"<span class="variable">$&#123;2&#125;</span>"</span> = <span class="string">"start"</span> ] || [ <span class="string">"<span class="variable">$&#123;2&#125;</span>"</span> = <span class="string">"reconnect"</span> ]; <span class="keyword">then</span></div><div class="line">	/sbin/iptables -I FORWARD -o virbr0 -d  <span class="variable">$GUEST_IP</span> -j ACCEPT</div><div class="line">	/sbin/iptables -t nat -I PREROUTING -p tcp --dport <span class="variable">$HOST_PORT</span> -j DNAT --to <span class="variable">$GUEST_IP</span>:<span class="variable">$GUEST_PORT</span></div><div class="line">   <span class="keyword">fi</span></div><div class="line"><span class="keyword">fi</span></div></pre></td></tr></table></figure>
+</li>
+<li><p>重启libvirtd服务</p>
+</li>
+<li>启动domain</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2018/06/27/environmental-isolation-5-virtualbox-traffic-moniter/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/27/environmental-isolation-5-virtualbox-traffic-moniter/" itemprop="url">环境隔离方案探索（五）、virtualbox虚拟机流量监控</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-27T11:25:00+08:00">
+                2018-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>想要监控虚拟机产生的流量，目前发现的方式只有三种：</p>
+<ul>
+<li>NAT连接方式下，使用virtualbox提供的<code>metrics</code>功能</li>
+<li>NAT连接方式下，使用virtualbox提供的<code>--nictrace</code>选项</li>
+<li>Bridged Network连接方式下，监控监控网关上的流量</li>
+</ul>
+<h3 id="metrics子功能"><a href="#metrics子功能" class="headerlink" title="metrics子功能"></a>metrics子功能</h3><p>metrics是virtualbox提供的可以监控虚拟机资源指标子功能。通过提供一个采样数和采样间隔来估算指标，即每隔多长时间采一次样本，直到达到指定样本数。所有样本之和/总采样次数=平均值。</p>
+<p>可以通过<code>vboxmanage metrics list</code>查看支持的查看的指标。我们这里关心的流量相关的指标为<code>Net/Rate/Rx</code>和<code>Net/Rate/Tx</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[root@host3 vms]<span class="comment"># vboxmanage metrics query test Net/Rate/Rx,Net/Rate/Tx</span></div><div class="line">Object          Metric                                   Values</div><div class="line">--------------- ---------------------------------------- --------------------------------------------</div><div class="line"><span class="built_in">test</span>   Net/Rate/Rx                              101 B/s</div><div class="line"><span class="built_in">test</span>   Net/Rate/Tx                              97 B/s</div></pre></td></tr></table></figure>
+<p>这里给出的是带宽值，我们想要的是流量值，所以还有个时间因素在里面，因此这样计算出来的流量十分不准确。基本不考虑该方式。</p>
+<h3 id="–nictrace选项"><a href="#–nictrace选项" class="headerlink" title="–nictrace选项"></a>–nictrace选项</h3><p>virtualbox提供对指定网卡上通信的追踪，即<code>--nictrace</code>选项对应的功能，给指定网卡打开这个选项，则同时还需要提供<code>--nictracefile</code>来指明需要将对网卡的监控信息打印到什么文件。</p>
+<p>如果虚拟机未开启，则直接用<code>modifyvm</code>即可：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">vboxmanage modifyvm <span class="built_in">test</span> --nictrace1 on --nictracefile /root/vms/test.pcap</div></pre></td></tr></table></figure>
+<p>如果虚拟机已开启，则需要使用<code>controlvm</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">vboxmanage controlvm  <span class="built_in">test</span> nictrace1 on --nictracefile /root/vms/test.pcap</div></pre></td></tr></table></figure>
+<p>实际上就是以pcap格式抓包存放在文件中。所以可以通过wireshark打开这个文件看到格式。所以这种方式需要写个额外的程序从pcap文件里去分析出所有的流浪，需要消耗的较多的资源才能拿到这个信息。</p>
+<h3 id="监控网卡"><a href="#监控网卡" class="headerlink" title="监控网卡"></a>监控网卡</h3><p>一开始最简单的想法就是直接看网卡上记录的<code>tx</code>和<code>rx</code>，但是前面使用的网络连接方式一直NAT，从virtualbox的文档来看，并没有提供相关的方式去查询其NAT网络上某台虚拟机的流量。</p>
+<p>因而改成使用网桥连接，如果让虚拟机直接桥接在物理网卡上，那么就和宿主机的流量混在一起了，而且虚拟机需要占用和物理网卡同一网段的IP，这还得看物理网卡所连的网络支不支持。</p>
+<p>这时候虚拟网桥就派上用场了，参见: <a href="https://www.virtualbox.org/wiki/Advanced_Networking_Linux" target="_blank" rel="external">https://www.virtualbox.org/wiki/Advanced_Networking_Linux</a></p>
+<p>我这里全手工操作：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 创建虚拟网桥，并设置好网桥的IP段，配置好该网桥的路由</span></div><div class="line">brctl addbr br0</div><div class="line">ip addr add 10.1.1.1/24 dev br0</div><div class="line">ip route add 10.1.1.0/24 dev br0</div><div class="line"></div><div class="line"><span class="comment"># 创建一个tap虚拟网卡，挂在网桥上，虚拟机桥接在这个网卡上</span></div><div class="line">tunctl -t tap0 -u root</div><div class="line">brctl addif br0 tap0</div><div class="line"></div><div class="line"><span class="comment"># 启动</span></div><div class="line">ip link <span class="built_in">set</span> up dev tap0</div><div class="line">ip link <span class="built_in">set</span> up dev br0</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">[root@host3 vms]<span class="comment"># ifconfig</span></div><div class="line">br0       Link encap:Ethernet  HWaddr 0E:7B:7C:8B:E8:62</div><div class="line">          inet addr:10.1.1.1  Bcast:0.0.0.0  Mask:255.255.255.0</div><div class="line">          inet6 addr: fe80::c7b:7cff:fe8b:e862/64 Scope:Link</div><div class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</div><div class="line">          RX packets:2339 errors:0 dropped:0 overruns:0 frame:0</div><div class="line">          TX packets:2008 errors:0 dropped:0 overruns:0 carrier:0</div><div class="line">          collisions:0 txqueuelen:0</div><div class="line">          RX bytes:194783 (190.2 KiB)  TX bytes:192474 (187.9 KiB)</div><div class="line"></div><div class="line">em1       Link encap:Ethernet  HWaddr 78:2B:CB:6B:80:45</div><div class="line">          inet addr:192.168.1.12  Bcast:192.168.1.255  Mask:255.255.255.0</div><div class="line">          inet6 addr: fe80::7a2b:cbff:fe6b:8045/64 Scope:Link</div><div class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</div><div class="line">          RX packets:25706902 errors:0 dropped:0 overruns:0 frame:0</div><div class="line">          TX packets:16563032 errors:0 dropped:0 overruns:0 carrier:0</div><div class="line">          collisions:0 txqueuelen:1000</div><div class="line">          RX bytes:20871205353 (19.4 GiB)  TX bytes:5738131713 (5.3 GiB)</div><div class="line"></div><div class="line">lo        Link encap:Local Loopback</div><div class="line">          inet addr:127.0.0.1  Mask:255.0.0.0</div><div class="line">          inet6 addr: ::1/128 Scope:Host</div><div class="line">          UP LOOPBACK RUNNING  MTU:65536  Metric:1</div><div class="line">          RX packets:29615667 errors:0 dropped:0 overruns:0 frame:0</div><div class="line">          TX packets:29615667 errors:0 dropped:0 overruns:0 carrier:0</div><div class="line">          collisions:0 txqueuelen:0</div><div class="line">          RX bytes:12302796853 (11.4 GiB)  TX bytes:12302796853 (11.4 GiB)</div><div class="line"></div><div class="line">tap0      Link encap:Ethernet  HWaddr 0E:7B:7C:8B:E8:62</div><div class="line">          inet6 addr: fe80::c7b:7cff:fe8b:e862/64 Scope:Link</div><div class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</div><div class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</div><div class="line">          TX packets:0 errors:0 dropped:121 overruns:0 carrier:0</div><div class="line">          collisions:0 txqueuelen:500</div><div class="line">          RX bytes:0 (0.0 b)  TX bytes:0 (0.0 b)</div></pre></td></tr></table></figure>
+<p>宿主机上的网络环境准备好了之后，开始配置虚拟机，虚拟机网络连接方式改为<code>Bridged Network</code>，网卡选择<code>tap0</code>，然后启动虚拟机，设置好静态IP为<code>10.1.1.2</code>，网关指定为<code>10.1.1.1</code>。并添加默认路由。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">ip link <span class="built_in">set</span> up dev eth0</div><div class="line">ip addr add 10.1.1.2/24 dev eth0</div><div class="line">ip route add default via 10.1.1.1 dev eth0</div></pre></td></tr></table></figure>
+<p>这时候，虚拟机和宿主机之间是通的了。即<code>10.1.1.1</code>、<code>10.1.1.2</code>、<code>192.168.1.12</code>之间是互通的。并且能够在网关<code>10.1.1.1</code>上记录所有产生的流量，但是虚拟机无法上外网，要做进一步的NAT和转发配置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 打开内核的路由功能</span></div><div class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/ip_forward</div><div class="line"></div><div class="line"><span class="comment"># 配置所有从10.1.1.0/24出来的包都修改源IP为 192.168.1.12</span></div><div class="line">iptables -t nat -A POSTROUTING -s 10.1.1.0/24 -j SNAT --to 192.168.1.12</div><div class="line"></div><div class="line"><span class="comment"># 重启iptables</span></div><div class="line">service iptables restart</div></pre></td></tr></table></figure>
+<p>OK，至此虚拟机已经能正常工作了。并且所有产生的流量都会记录在网关<code>10.1.1.1</code>上，即<code>br0</code>上。</p>
+<p>这里经过测试发现，如果虚拟机直接桥接在<code>br0</code>上，而不是<code>tap0</code>上的话，是不会记录流量的，这也是为什么桥接在<code>tap0</code>上时只有<code>br0</code>上有流量。初步了解是<code>br0</code>相对于虚拟机而言实际在充当网关功能，<code>tap0</code>相对于虚拟机而言是交换机的功能，所以会出现这种情况。</p>
+<p>这种方式有个不好地方，就是需要去虚拟机里面进行相关设置。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2018/06/27/environmental-isolation-4-virtualbox/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/27/environmental-isolation-4-virtualbox/" itemprop="url">环境隔离方案探索（四）、virtualbox重用</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-27T11:24:00+08:00">
+                2018-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>前面探索了virtualbox的安装和配置过程，主要熟悉了下virtualbox提供了对虚拟机的哪些配置，能不能符合使用需求。</p>
+<p>现在要考虑实际应用场景，virtualbox的虚拟机可重用性问题。理想的效果是，就像个箱子一样，要用的时候搬过来就行了，至于箱子里面是啥样我完全不管。但实际中箱子的放置是存在条件的，比如你箱子太大了，不适合放我这用等。</p>
+<p>我们这里先考虑下，如何快速的重用virtualbox的虚拟机。</p>
+<h2 id="直接重新安装"><a href="#直接重新安装" class="headerlink" title="直接重新安装"></a>直接重新安装</h2><p>这种方式前面已经试过，好处是随便自己定制，坏处是安装时间太长，而且可能需要进入到虚拟机系统内部去进行相关设置。</p>
+<h2 id="拷贝虚拟机文件夹"><a href="#拷贝虚拟机文件夹" class="headerlink" title="拷贝虚拟机文件夹"></a>拷贝虚拟机文件夹</h2><p>直接拷贝虚拟机文件夹，比如在A机器上安装好之后，现在要在B机器上使用，就直接将A机器上虚拟机相关的配置文件和虚拟机磁盘一起拷贝到B机器上，然后在B机器上重新进行注册即可。</p>
+<p>实际上虚拟机的配置文件<code>xxx.vbox</code>就是一个xml格式的文件，里面记录了这个虚拟机的名字，模拟的硬件配置等信息，重新注册的过程中如果出现了什么错误，可以通过修改这个配置文件解决。</p>
+<p>这种方式的缺点是，这个文件夹很大，比实际安装的那个iso可能还大，比如测试过程中，我的iso大小才1个多G，但是安装完之后这个文件夹有4个多G。如果虚拟机磁盘是固定大小的，则更大的离谱，完全不方便移动。</p>
+<h2 id="使用virtualbox的导入导出"><a href="#使用virtualbox的导入导出" class="headerlink" title="使用virtualbox的导入导出"></a>使用virtualbox的导入导出</h2><p>virtualbox本身提供了导入导出功能，导出后的虚拟机是一个<code>.ova</code>格式文件，实质上就是对虚拟机的配置文件和虚拟磁盘的压缩。</p>
+<p>但是不同的是，既然这个是virtualbox提供的，自然做了额外的工作，比如会修改掉id，并且导入的时候还可以指定是否保留原来的网卡或者硬盘mac地址等，保留网卡mac地址很重要，因为如果用的是静态IP地址的话，如果更改了网卡的mac地址，IP是不生效的，这个是测试出来的，具体原因还没搞明白。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#!/bin/bash</span></div><div class="line"><span class="built_in">set</span> -e</div><div class="line"><span class="built_in">set</span> -o errexit</div><div class="line"></div><div class="line">SSH_PORT=61493</div><div class="line">VMFOLDER=<span class="string">"/Users/danny/tmp"</span></div><div class="line"><span class="comment"># VMFOLDER="/root/vms"</span></div><div class="line">VMNAME=<span class="string">"test"</span></div><div class="line">OVA=<span class="string">"/Users/danny/tmp/test.ova"</span></div><div class="line"><span class="comment"># OVA="/root/test.ova"</span></div><div class="line"><span class="comment"># 最大CPU个数：--cpus./</span></div><div class="line">CPUS=1</div><div class="line"><span class="comment"># 允许的CPU使用量：--cpuexecutioncap 50</span></div><div class="line">CPUCAP=100</div><div class="line"><span class="comment"># 最大内存，MB: --memory</span></div><div class="line">MEMORY=1024 </div><div class="line"><span class="comment"># 最大带宽（上行）: --limit &lt;megabytes per second&gt;[k|m|g|K|M|G]</span></div><div class="line">RATE=1m</div><div class="line"></div><div class="line"><span class="comment"># 导入前要知道</span></div><div class="line"><span class="comment"># 1、需要多大空间来放虚拟机</span></div><div class="line"><span class="comment"># 2、需要多大的数据盘</span></div><div class="line"><span class="comment"># 3、至少需要多少CPU、内存资源</span></div><div class="line"><span class="comment"># 4、带宽</span></div><div class="line"></div><div class="line"><span class="comment"># 修改默认目录</span></div><div class="line">VBoxManage setproperty machinefolder <span class="variable">$&#123;VMFOLDER&#125;</span></div><div class="line"></div><div class="line"><span class="comment"># 导入</span></div><div class="line">DISK_UNIT=6</div><div class="line">VBoxManage import <span class="variable">$&#123;OVA&#125;</span> --options keepnatmacs --vsys 0  --vmname <span class="variable">$&#123;VMNAME&#125;</span> --unit <span class="variable">$&#123;DISK_UNIT&#125;</span> --disk <span class="string">"<span class="variable">$&#123;VMFOLDER&#125;</span>/<span class="variable">$&#123;VMNAME&#125;</span>/<span class="variable">$&#123;VMNAME&#125;</span>.vdi"</span></div><div class="line"></div><div class="line"><span class="comment"># 限制资源使用</span></div><div class="line">VBoxManage bandwidthctl <span class="variable">$&#123;VMNAME&#125;</span> add <span class="variable">$&#123;VMNAME&#125;</span>_Limit --<span class="built_in">type</span> network --<span class="built_in">limit</span> <span class="variable">$&#123;RATE&#125;</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --cpus <span class="variable">$&#123;CPUS&#125;</span> --cpuexecutioncap <span class="variable">$&#123;CPUCAP&#125;</span> --memory <span class="variable">$&#123;MEMORY&#125;</span> --nicbandwidthgroup1 <span class="variable">$&#123;VMNAME&#125;</span>_Limit</div><div class="line"></div><div class="line"><span class="comment"># 添加端口映射，这个是可以继承的。即如果虚拟机本身是配置了的，那么导出的这个本身就是加了的。</span></div><div class="line"><span class="comment"># VBoxManage modifyvm $&#123;VMNAME&#125; --natpf1 "tcp_2222_61493,tcp,,2222,,$&#123;SSH_PORT&#125;"</span></div><div class="line"><span class="comment"># VBoxManage modifyvm $&#123;VMNAME&#125; --natpf1 "tcp_8080_80,tcp,,8080,,80"</span></div><div class="line"><span class="comment"># VBoxManage modifyvm $&#123;VMNAME&#125; --natpf1 "tcp_10443_443,tcp,,10443,,443"</span></div><div class="line"></div><div class="line"><span class="comment"># 创建新磁盘</span></div><div class="line"><span class="comment"># DISKSIZE=1024</span></div><div class="line"><span class="comment"># DISKTYPE="Standard"</span></div><div class="line"><span class="comment"># DISKPATH="$&#123;VMFOLDER&#125;/$&#123;VMNAME&#125;/$&#123;VMNAME&#125;_1.vdi"</span></div><div class="line"><span class="comment"># STORAGECTL_NAME="SATA"</span></div><div class="line"><span class="comment"># VBoxManage createmedium disk --filename $&#123;DISKPATH&#125; --format VDI --size $&#123;DISKSIZE&#125; --variant $&#123;DISKTYPE&#125;</span></div><div class="line"><span class="comment"># VBoxManage storageattach $&#123;VMNAME&#125; --storagectl $&#123;STORAGECTL_NAME&#125; --device 0 --port 1 --type hdd\</span></div><div class="line"><span class="comment">#     --medium $&#123;DISKPATH&#125;</span></div><div class="line"></div><div class="line"><span class="comment"># 启动</span></div><div class="line">VBoxManage startvm <span class="variable">$&#123;VMNAME&#125;</span> --<span class="built_in">type</span> headless</div><div class="line"></div><div class="line"><span class="comment"># VBoxManage unregistervm $&#123;VMNAME&#125; --delete</span></div></pre></td></tr></table></figure>
+<p>有几点需要注意：</p>
+<ol>
+<li>重新导入后的虚拟机，如果不重新命名虚拟机，而机器上又存在同名或者同ID了的虚拟机，则会失败，并且会在同名那个虚拟机下面创建虚拟磁盘而不会删除。</li>
+<li>重新导入后的虚拟机，默认的虚拟磁盘格式为<code>.vmdk</code>，这种格式不可以扩容。如果有扩容需要需要在导入的时候重新指定磁盘文件名，现在可以更改成<code>.vdi</code>后缀即可。但是<code>import</code>命令里面磁盘修改的选项是根据VM的硬件配置而不同的。</li>
+<li>重新导入后的虚拟机，如果扩容原虚拟磁盘，还需要进入虚拟机内部对磁盘进行相关设置才行。</li>
+</ol>
+<p>以上几点主要就是重新导入后虚拟磁盘的扩容问题，因为新的机器上磁盘空间分布会变化，调整磁盘很平常。可以采取系统盘+数据盘的方式。即制作导出包的时候，只提供系统盘，等重新导入后，再挂载一个数据盘上去。</p>
+<p>其他需要修改的配置，则在导入后，直接<code>modifyvm</code>即可。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2018/06/27/environmental-isolation-3-virtualbox/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/27/environmental-isolation-3-virtualbox/" itemprop="url">环境隔离方案探索（三）、virtualbox</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-27T11:23:00+08:00">
+                2018-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>虚拟化是云计算的基础。简单的说，虚拟化使得在一台物理的服务器上可以跑多台虚拟机，虚拟机共享物理机的 CPU、内存、IO 硬件资源，但逻辑上虚拟机之间是相互隔离的。</p>
+<p>物理机我们一般称为宿主机（Host），宿主机上面的虚拟机称为客户机（Guest）。</p>
+<p>那么 Host 是如何将自己的硬件资源虚拟化，并提供给 Guest 使用的呢？<br>这个主要是通过一个叫做 Hypervisor 的程序实现的。</p>
+<p>根据 Hypervisor 的实现方式和所处的位置，虚拟化又分为两种：<br>1型虚拟化和2型虚拟化</p>
+<p>1、型虚拟化<br>Hypervisor 直接安装在物理机上，多个虚拟机在 Hypervisor 上运行。Hypervisor 实现方式一般是一个特殊定制的 Linux 系统。Xen 和 VMWare 的 ESXi 都属于这个类型。</p>
+<p>2、型虚拟化<br>物理机上首先安装常规的操作系统，比如 Redhat、Ubuntu 和 Windows。Hypervisor 作为 OS 上的一个程序模块运行，并对管理虚拟机进行管理。KVM、VirtualBox 和 VMWare Workstation 都属于这个类型。</p>
+<p>理论上讲：</p>
+<p>1型虚拟化一般对硬件虚拟化功能进行了特别优化，性能上比2型要高；</p>
+<p>2型虚拟化因为基于普通的操作系统，会比较灵活，比如支持虚拟机嵌套。嵌套意味着可以在KVM虚拟机中再运行KVM。</p>
+<p>好了，总之先从virtualbox开始吧。</p>
+<h1 id="VirtualBox"><a href="#VirtualBox" class="headerlink" title="VirtualBox"></a>VirtualBox</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><ul>
+<li>开源，小（约30M)，软件虚拟化（大多数无需硬件虚拟化支持）。</li>
+<li>支持很多平台：Windows, many Linux distributions, Mac OS X, Solaris and OpenSolaris</li>
+<li><a href="https://www.virtualbox.org/wiki/Guest_OSes" target="_blank" rel="external">支持很多客户系统</a>: linux内核2.4和2.6以上。推荐2.6.13+。2.6.18和2.6.18.2可能引起启动时崩溃。</li>
+<li>扩展包支持”Disk image encryption with AES algorithm”，这个可以用来防止虚拟机被盗用从而泄露虚拟机内程序？？</li>
+</ul>
+<h2 id="创建vm"><a href="#创建vm" class="headerlink" title="创建vm"></a>创建vm</h2><p>且看脚本：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#!/bin/bash </span></div><div class="line"></div><div class="line"><span class="comment"># 设置出错则停止退出</span></div><div class="line"><span class="built_in">set</span> -e</div><div class="line"><span class="built_in">set</span> -o errexit</div><div class="line"></div><div class="line">VMFOLDER=<span class="string">"/Users/danny/tmp"</span></div><div class="line">VMNAME=<span class="string">"test1"</span></div><div class="line">ISO=<span class="string">"centos7-custom.iso"</span></div><div class="line">DISKSIZE=8192</div><div class="line">DISKTYPE=<span class="string">"Standard"</span></div><div class="line"></div><div class="line"></div><div class="line"><span class="comment"># 0、修改虚拟机存放目录</span></div><div class="line">VBoxManage setproperty machinefolder <span class="variable">$&#123;VMFOLDER&#125;</span></div><div class="line"></div><div class="line"><span class="comment"># 1、创建虚拟机，同时注册到VirtualBox</span></div><div class="line">VBoxManage createvm --name <span class="variable">$&#123;VMNAME&#125;</span> --ostype <span class="string">"RedHat_64"</span> --register</div><div class="line"></div><div class="line"><span class="comment"># 2、配置虚拟硬盘</span></div><div class="line"><span class="comment"># 2.1 创建虚拟磁盘</span></div><div class="line">VBoxManage createmedium disk --filename <span class="string">"<span class="variable">$&#123;VMFOLDER&#125;</span>/<span class="variable">$&#123;VMNAME&#125;</span>/<span class="variable">$&#123;VMNAME&#125;</span>.vdi"</span>\</div><div class="line">    --format VDI --size <span class="variable">$&#123;DISKSIZE&#125;</span> --variant <span class="variable">$&#123;DISKTYPE&#125;</span></div><div class="line"></div><div class="line"><span class="comment"># 2.2 创建存储控制器，用来挂载虚拟磁盘</span></div><div class="line">VBoxManage storagectl <span class="variable">$&#123;VMNAME&#125;</span> --name sata --add sata --portcount 2</div><div class="line"></div><div class="line"><span class="comment"># 2.3 挂载虚拟磁盘到虚拟机</span></div><div class="line">VBoxManage storageattach <span class="variable">$&#123;VMNAME&#125;</span> --storagectl sata --device 0 \</div><div class="line">--port 0 --<span class="built_in">type</span> hdd --medium <span class="string">"<span class="variable">$&#123;VMFOLDER&#125;</span>/<span class="variable">$&#123;VMNAME&#125;</span>/<span class="variable">$&#123;VMNAME&#125;</span>.vdi"</span></div><div class="line"></div><div class="line"></div><div class="line"><span class="comment"># 3、挂载iso（如果使用无人值守模式安装，则不需要手动去配置）</span></div><div class="line">VBoxManage storageattach <span class="variable">$&#123;VMNAME&#125;</span> --storagectl sata --device 0 \</div><div class="line">--port 1 --<span class="built_in">type</span> dvddrive --medium <span class="variable">$&#123;ISO&#125;</span></div><div class="line"></div><div class="line"><span class="comment"># 4、配置开机启动顺序</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --boot1 dvd --boot2 disk --boot3 none</div><div class="line"></div><div class="line"><span class="comment"># 5、配置最大内存和CPU</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --memory 1024 --cpus 1 --cpuexecutioncap 50</div><div class="line"></div><div class="line"><span class="comment"># 6、删除不需要的硬件</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --audio none --usb off --defaultfrontend headless</div><div class="line"></div><div class="line"><span class="comment"># 7、网络设置</span></div><div class="line"><span class="comment"># 7.1 创建一个限速组，只能限制虚拟机的发送带宽（通过延迟发送），不能限制接收带宽。</span></div><div class="line">VBoxManage bandwidthctl <span class="variable">$&#123;VMNAME&#125;</span> add Limit --<span class="built_in">type</span> network --<span class="built_in">limit</span> 1m</div><div class="line"></div><div class="line"><span class="comment"># 7.2 将网卡加入到限速组</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --nicbandwidthgroup1 Limit</div><div class="line"></div><div class="line"><span class="comment"># 7.3 修改网卡类型</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --nictype1 virtio</div><div class="line"></div><div class="line"><span class="comment"># 8、配置端口转发，可以配置主机IP为127.0.0.1，这样就只有127.0.0.1的端口做转发</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --natpf1 <span class="string">",tcp,,2222,,22"</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --natpf1 <span class="string">",tcp,,8080,,80"</span></div><div class="line">VBoxManage modifyvm <span class="variable">$&#123;VMNAME&#125;</span> --natpf1 <span class="string">",tcp,,10443,,443"</span></div><div class="line"></div><div class="line"><span class="comment"># 9、安装系统</span></div><div class="line">VboxManage startvm <span class="variable">$&#123;VMNAME&#125;</span> --<span class="built_in">type</span> headless</div><div class="line"></div><div class="line"><span class="comment"># 无人值守安装，报错 VERR_OUT_OF_RANGE</span></div><div class="line"><span class="comment"># VBoxManage unattended install $&#123;VMNAME&#125; --package-selection-adjustment=minimal\</span></div><div class="line">--start-vm=headless --iso <span class="variable">$&#123;ISO&#125;</span></div><div class="line"></div><div class="line"><span class="comment"># 10、用如下方式如检测系统是否正常启动了</span></div><div class="line">ssh -o ConnectTimeout=300 -o ConnectionAttempts=1 root@127.0.0.1 -p 2222 \</div><div class="line">-o PasswordAuthentication=no</div></pre></td></tr></table></figure>
+<p>创建的虚拟机可以使用<code>--basefolder</code> 指明创建的虚拟机配置存放目录，注意如果指定了这个，那么后面<code>modifyvm --name</code>只会更改文件夹名，而不会去更改配置文件名称了。</p>
+<p><code>--ostype</code>后面的参数来源于下面的ID：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">ᐅ vbm list ostypes | grep <span class="string">"ID:"</span> | grep -v <span class="string">"Family"</span></div><div class="line">...</div><div class="line">ID:          RedHat_64</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>另外上面第十步，<code>ConnectTimeout</code>是超时时长，实际过程中应该是开启循环做检测。因为是通过端口转发的方式来检测，所以这里要检测准发目标<code>22</code>端口是否能正常<code>ssh</code>到，而不是检查<code>2222</code>端口是否已开启监听。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment"># 虚拟机还未poweron，这时候2222端口还未开启监听</span></div><div class="line">ᐅ ssh -o ConnectTimeout=300 -o ConnectionAttempts=1 root@127.0.0.1 -p 2222 -o PasswordAuthentication=no</div><div class="line">ssh: connect to host 127.0.0.1 port 2222: Connection refused</div><div class="line"></div><div class="line"><span class="comment"># 超时</span></div><div class="line">ᐅ ssh -o ConnectTimeout=3 -o ConnectionAttempts=1 root@127.0.0.1 -p 2222 -o PasswordAuthentication=no</div><div class="line">ssh: connect to host 127.0.0.1 port 2222: Operation timed out</div><div class="line"></div><div class="line"><span class="comment"># 虚拟机poweron后，启动过程中，会卡主，等待超时或者可以连上。</span></div><div class="line">ᐅ ssh -o ConnectTimeout=300 -o ConnectionAttempts=1 root@127.0.0.1 -p 2222 -o PasswordAuthentication=no</div><div class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</div><div class="line">@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @</div><div class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</div><div class="line">IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!</div><div class="line">Someone could be eavesdropping on you right now (man-in-the-middle attack)!</div><div class="line">It is also possible that a host key has just been changed.</div><div class="line">The fingerprint <span class="keyword">for</span> the RSA key sent by the remote host is</div><div class="line">SHA256:xB74ECrTYkTDwGIpUWjnwb2PlJrliHenliYdHd2F6ng.</div><div class="line">Please contact your system administrator.</div><div class="line">Add correct host key <span class="keyword">in</span> /Users/danny/.ssh/known_hosts to get rid of this message.</div><div class="line">Offending RSA key <span class="keyword">in</span> /Users/danny/.ssh/known_hosts:29</div><div class="line">Keyboard-interactive authentication is disabled to avoid man-in-the-middle attacks.</div><div class="line">root@127.0.0.1: Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password).</div></pre></td></tr></table></figure>
+<h4 id="限制带宽"><a href="#限制带宽" class="headerlink" title="限制带宽"></a>限制带宽</h4><p><a href="https://www.virtualbox.org/manual/ch06.html#network_bandwidth_limit" target="_blank" rel="external">https://www.virtualbox.org/manual/ch06.html#network_bandwidth_limit</a></p>
+<p>只能限制虚拟机的发送带宽（通过延迟发送），不能限制接收带宽。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 创建一个名为"Limit"的限制组，限速为20Mbit/s</span></div><div class="line">VBoxManage bandwidthctl <span class="string">"test"</span> add Limit --<span class="built_in">type</span> network --<span class="built_in">limit</span> 20m</div><div class="line"></div><div class="line"><span class="comment"># 将网卡1和网卡2加入到限制组。这样网卡1和网卡2的总带宽之和不能超过20Mbit/s</span></div><div class="line">VBoxManage modifyvm <span class="string">"test"</span> --nicbandwidthgroup1 Limit</div><div class="line">VBoxManage modifyvm <span class="string">"test"</span> --nicbandwidthgroup2 Limit</div><div class="line"></div><div class="line"><span class="comment"># VM运行过程中可以直接修改限制，立刻生效</span></div><div class="line">VBoxManage bandwidthctl <span class="string">"test"</span> <span class="built_in">set</span> Limit --<span class="built_in">limit</span> 100k</div><div class="line"></div><div class="line"><span class="comment"># 还可以完全禁用网卡带宽（即不允许发送）</span></div><div class="line">VBoxManage modifyvm <span class="string">"test"</span> --nicbandwidthgroup1 none</div><div class="line"></div><div class="line"><span class="comment"># 或者直接设置某个组的网卡都不能用</span></div><div class="line">VBoxManage bandwidthctl <span class="string">"test"</span> <span class="built_in">set</span> Limit --<span class="built_in">limit</span> 0</div></pre></td></tr></table></figure>
+<h4 id="配置端口转发"><a href="#配置端口转发" class="headerlink" title="配置端口转发"></a>配置端口转发</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment"># 给网卡nat网卡1配置一个端口转发，对应的参数字符串格式为:</span></div><div class="line"><span class="comment"># "名称，协议(必须，TCP或者UDP），主机iP，主机端口，虚拟机IP，虚拟机端口"</span></div><div class="line">VBoxManage modifyvm <span class="string">"VM name"</span> --natpf1 <span class="string">"guestssh,tcp,,2222,,22"</span></div><div class="line"></div><div class="line"><span class="comment"># 如果虚拟机的NAT连接网卡不是以DHCP获取IP，那么得显示指定IP才能做端口转发</span></div></pre></td></tr></table></figure>
+<h4 id="删除音频设备"><a href="#删除音频设备" class="headerlink" title="删除音频设备"></a>删除音频设备</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">VboxManage modifyvm <span class="built_in">test</span> --audio none</div></pre></td></tr></table></figure>
+<h4 id="存储控制器"><a href="#存储控制器" class="headerlink" title="存储控制器"></a>存储控制器</h4><p>增加一个stata硬盘和一个ide光驱：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">VboxManage storagectl <span class="built_in">test</span> --name sata --add sata --portcount 1</div><div class="line">VboxManage storagectl <span class="built_in">test</span> vm_noostype --name ide --add ide</div></pre></td></tr></table></figure>
+<h4 id="挂载介质"><a href="#挂载介质" class="headerlink" title="挂载介质"></a>挂载介质</h4><p>挂载ISO：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">VboxManage storageattach <span class="built_in">test</span> --storagectl ide --port 1 --device 1 --<span class="built_in">type</span> dvddrive --medium /Users/danny/csxy/机器初始化/1系统镜像/centos6.7-2.6.32-573-strong10-20160722-x86_64.iso</div></pre></td></tr></table></figure>
+<p>创建虚拟硬盘，分配动态大小，最大25GB：</p>
+<p>[–variant Standard,Fixed,Split2G,Stream,ESX]<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">BoxManage createmedium disk --filename <span class="string">"/Users/danny/VirtualBox VMs/test/test.vdi"</span> --format VDI --size 25600 --variant Standard</div><div class="line"></div><div class="line">VBoxManage storageattach <span class="built_in">test</span> --storagectl sata --port 0 --device 0 --<span class="built_in">type</span> hdd --medium <span class="string">"/Users/danny/VirtualBox VMs/test/test.vdi"</span></div></pre></td></tr></table></figure></p>
+<h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">VboxManage startvm <span class="built_in">test</span> --<span class="built_in">type</span> headless</div></pre></td></tr></table></figure>
+<p><strong>我们的目的肯定是在无GUI环境下装好，但是无GUI环境下我们怎么知道系统安装完成了呢？还有如果ISO提供的是交互式安装的模式的怎么办？</strong></p>
+<p>VboxManage提供了一种无人值守模式的安装，使用这种模式的时候都无需挂载IDE光驱，测试发现这种模式可以正常安装交互模式的ISO，但是无法安装自己打包出的快速安装的ISO。并且交互模式的ISO安装完成后，网卡配置文件中的<code>onboot=no</code>，即不是自动启动的，需要进入后修改成<code>yes</code>然后重启网络服务。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">VBoxManage unattended install <span class="built_in">test</span> --iso /Users/danny/csxy/机器初始化/1系统镜像/centos6.7-2.6.32-573-strong10-20160722-x86_64.iso   --user=root --password=a ----package-selection-adjustment=minimal start-vm=headless</div></pre></td></tr></table></figure>
+<h2 id="卸载"><a href="#卸载" class="headerlink" title="卸载"></a>卸载</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">VBoxManage unregistervm test --delete</div></pre></td></tr></table></figure>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>每次需要使用的时候，都重新从iso去进行安装，然后等待安装完成，还得进入VM系统内进行配置，这个过程可重用性很低，而且耗时间。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2018/06/27/environmental-isolation-2-docker-iso-make/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/27/environmental-isolation-2-docker-iso-make/" itemprop="url">环境隔离方案探索（二）、docker镜像制作</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-27T11:21:00+08:00">
+                2018-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="iso-to-docker-image"><a href="#iso-to-docker-image" class="headerlink" title="iso to docker image"></a>iso to docker image</h1><p>需要把客户提供的iso转换成docker image，通过docker 容器来提供这个环境的方案，我这里先研究下有哪些可以把 iso包 打成 docker image 的方式，我这里这个测试的iso原大小为1.4G。</p>
+<h2 id="一、先安装，再从安装后的文件系统压缩出来"><a href="#一、先安装，再从安装后的文件系统压缩出来" class="headerlink" title="一、先安装，再从安装后的文件系统压缩出来"></a>一、先安装，再从安装后的文件系统压缩出来</h2><p>这里直接引用google到的一段内容，大概描述了整个步骤：</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">This is what I <span class="built_in">do</span> <span class="built_in">to</span> <span class="built_in">create</span> <span class="keyword">a</span> CentOS docker image:</div><div class="line"></div><div class="line"><span class="keyword">a</span>) A <span class="string">'Minimal'</span> installation.</div><div class="line"></div><div class="line">b) Remove <span class="keyword">the</span> following packages.</div><div class="line"></div><div class="line"> <span class="comment"># yum remove iwl* ql* xorg* ipw* ghostscript* libtheora systemtap-runtime alsa* mysql-libs iw hicolor-icon-theme *firmware* --exclude=kernel-firmware</span></div><div class="line"></div><div class="line">c) Clean <span class="keyword">the</span> yum cache.</div><div class="line"></div><div class="line"> <span class="comment"># yum clean all</span></div><div class="line"></div><div class="line">d) Tar up <span class="keyword">the</span> filesystem excluding <span class="keyword">the</span> un-wanted locations.</div><div class="line"></div><div class="line"> <span class="comment"># tar --numeric-owner --exclude=/proc --exclude=/sys --exclude=/mnt --exclude=/var/cache --exclude=/usr/share/&#123;foomatic,backgrounds,perl5,fonts,cups,qt4,groff,kde4,icons,pixmaps,emacs,gnome-background-properties,sounds,gnome,games,desktop-directories&#125;  --exclude=/var/log -zcvf /mnt/CentOS6.1-base.tar.gz /</span></div><div class="line"></div><div class="line">The tar <span class="built_in">file</span> is around <span class="number">150</span>MB.</div><div class="line"></div><div class="line">e) Load <span class="keyword">the</span> image <span class="built_in">to</span> docker.</div><div class="line"></div><div class="line"> <span class="comment"># cat CentOS6.1-base.tar.gz | docker import - centOS/6.1</span></div></pre></td></tr></table></figure>
+<p> 这种方式不符合我的需求，首先我不知道客户的这个iso里面，有哪些东西是不需要的，</p>
+<p> 我这里用virtualbox从iso安装好系统之后，直接执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tar --numeric-owner --exclude=/proc --exclude=/sys --exclude=/mnt --exclude=/var/cache --exclude=/usr/share/&#123;foomatic,backgrounds,perl5,fonts,cups,qt4,groff,kde4,icons,pixmaps,emacs,gnome-background-properties,sounds,gnome,games,desktop-directories&#125;  --exclude=/var/<span class="built_in">log</span> -zcvf /mnt/mycentos.tgz /</div></pre></td></tr></table></figure>
+<p>等了约有10分钟后，总算结束了，打出来的包有900多M，然后通过scp传输到有docker环境的机器上。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cat ./mycentos.tgz | docker import - mycentos</div></pre></td></tr></table></figure>
+<p>又等了约10分钟后，可以通过docker images命令看到这个新的image了，大小竟然有2.68G。。。。</p>
+<p>至此，这个image算是制作完成了。</p>
+<h2 id="二、使用-febootstrap-直接从-iso-中提取"><a href="#二、使用-febootstrap-直接从-iso-中提取" class="headerlink" title="二、使用 febootstrap 直接从 iso 中提取"></a>二、使用 febootstrap 直接从 iso 中提取</h2><p>febootstrap工具只有在centos6的仓库中有了，centos7下面，改成名为supermin了。supermin的用法我没搞明白，但是看介绍没有看到可以直接从iso里提取。</p>
+<p>所以这里在centos6下使用febootstrap测试：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mount -o loop path/to/centos.iso /mnt</div><div class="line">febootstrap centos6 mycentos file:///mnt</div></pre></td></tr></table></figure>
+<p>上面命令里centos6可以随便取名字，反正用的是本地的iso挂载出来的目录。mycentos是最后输出的目录。这个目录大小为569M，当然这个目录时没压缩的，也比方案一种的压缩包还小，所以应该是缺了不少东西了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tar -c mycentos | docker import - mycentos</div></pre></td></tr></table></figure>
+<p>最后做出来的image 552MB。</p>
+<h2 id="三、使用rpm-–root-选项来手动提取"><a href="#三、使用rpm-–root-选项来手动提取" class="headerlink" title="三、使用rpm –root 选项来手动提取"></a>三、使用rpm –root 选项来手动提取</h2><p>这种方式是利用rpm –root选项，指定rpm过程将想要的包都安装到root指定的目录中，有点类似于chroot的作用。</p>
+<p>这种方式需要知道到底需要安装哪些包才能制作出来，不适合我，我就不尝试了，下面粘贴上参考资料，这个资料是在ubuntu剩下打出一个RHEL的image:</p>
+<blockquote>
+<p>RHEL docker images are not available from Docker Hub. It’s available from Redhat docker registry and the catalog can be accessed here. However there could be cases where you might want to create a RHEL docker image from scratch. The following steps will guide you to create a RHEL docker image from scratch. While these steps are for creating RHEL 7.1 LE docker image on PowerPC servers, the same can be applied for creating RHEL docker image on Intel servers as well.</p>
+<p>The steps below have been performed on an Ubuntu 15.10 OS running as a PowerKVM guest. However you can run the same steps on RHEL or Fedora as well.</p>
+<p>Pre-requisites</p>
+<p>Access to RHEL package repository. You can use a local repository created from RHEL installation ISO as described below</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="comment"># mkdir -p /mnt/rhel7-repo</span></div><div class="line">&gt; <span class="comment"># mount -o loop RHEL-LE-7.1-20150219.1-Server-ppc64le-dvd1.iso /mnt/rhel7-repo/</span></div><div class="line"></div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>Install ‘yum’ package. This is not required on a RHEL or Fedora system as it’ll be there by default.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="comment"># apt-get install yum</span></div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>Steps to create a RHEL docker image</p>
+<p>Create a new RPM root directory</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="comment"># mkdir /rhel7-root</span></div><div class="line">&gt; <span class="comment"># export rpm_root=/rhel7-root</span></div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>Initialize the new RPM root directory</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="comment"># rpm --root $&#123;rpm_root&#125; --initdb</span></div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>The rest of the install instructions will use this new RPM root as the install destination for a minimalistic RHEL OS.</p>
+<p>Install the redhat-release-server rpm package for RHEL 7.1 LE</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="comment"># rpm --root $&#123;rpm_root&#125; -ivh /mnt/rhel7-repo/Packages/redhat-release-server-7.1-1.ael7b.ppc64le.rpm</span></div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>Configure yum repositories as required.<br>For example if you want to use only the local repository, then do the following</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="comment"># rm -f $&#123;rpm_root&#125;/etc/yum.repos.d/*.repo</span></div><div class="line">&gt; <span class="comment"># cat &gt;$&#123;rpm_root&#125;/etc/yum.repos.d/rhel71le.repo&lt;&lt;EOF</span></div><div class="line">&gt; [rhel71le]</div><div class="line">&gt; baseurl=file:///mnt/rhel7-repo</div><div class="line">&gt; enabled=1</div><div class="line">&gt; EOF</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>If you encounter ‘No such file or directory’ error, then you’ll need to create the /etc/yum.repos.d directory.</p>
+<p>Import GPG keys</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="comment"># rpm --root $&#123;rpm_root&#125; --import  /mnt/rhel7-repo/RPM-GPG-KEY-redhat-*</span></div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>Install minimalistic RHEL OS</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="comment"># yum -y --installroot=$&#123;rpm_root&#125; install yum</span></div><div class="line">&gt; This will install a minimalistic RHEL OS under /rhel7-root</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>Additional Customization<br>Chroot to the new RHEL installation and perform any additional customizations if required</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="comment"># chroot $&#123;rpm_root&#125; /bin/bash</span></div><div class="line">&gt; bash-4.2<span class="comment"># cat /etc/redhat-release </span></div><div class="line">&gt; Red Hat Enterprise Linux Server release 7.1 (Maipo)</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>Convert this RHEL installation to a docker image</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="comment"># tar -C $&#123;rpm_root&#125;/ -c . | docker import - rhel7le</span></div><div class="line">&gt; 9a6dac402e2bf561f833f644337f3061c6ff70ec906472d5c008755ca9ed7f1d</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="comment"># docker images</span></div><div class="line">&gt; REPOSITORY            TAG                 IMAGE ID            CREATED             VIRTUAL SIZE</div><div class="line">&gt; rhel7le               latest              9a6dac402e2b        11 seconds ago      360.6 MB</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>Use the new RHEL docker image</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="comment"># docker run --hostname='rhel7-container' rhel7le uname -a</span></div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>Linux rhel7-container 4.2.0-10-generic #12-Ubuntu SMP Tue Sep 15 19:46:04 UTC 2015 ppc64le ppc64le ppc64le GNU/Linux</p>
+</blockquote>
+<h1 id="测试和对比"><a href="#测试和对比" class="headerlink" title="测试和对比"></a>测试和对比</h1><p>这里主要对比方案一和方案二，首先最后得到的image大小就相差了好多倍，很明显使用febootstrap的方式缺少了不少包。实际后面测试的时候就发现方案二的容器里就缺少wget包。</p>
+<p>我对这两个image都进行了测试，最终都能安装好客户的程序。</p>
+<p>但是启动运行后，始终会出现一个没之前使用VM安装使用不会出现的问题：即cache第一次启动的时候会备份自己的配置文件，并且将其中一个重要的配置文件改成只有一条记录，我手动重新恢复这个配置文件，然后重启cache程序就好了。</p>
+<p>目前只在容器里出现过这个现象，所以初步怀疑是容器的环境毕竟还是有点不一样，然后这个cache里是不是进行了环境检查等导致的。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>docker的这个方案还是略显麻烦，并且最后还有一个程序第一次跑起来出问题的情况没有解决。</p>
+<p>另外实际上image和iso进行了转换，并且最后的容器并不是百分百和客户想要的iso环境一致。比如网络环境，docker需要通过宿主机额外的管理去提供多个虚拟网卡给容器，而客户自己的程序，可能安装的时候，会自己进行虚拟网卡配置等操作，那么这些操作在容器里就是行不通的。</p>
+<p>当然这不是docker的锅，本身其适用场景就是为了隔离应用程序环境而生，并不是为了隔离操作系统。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2018/06/27/environmental-isolation-1-docker/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/27/environmental-isolation-1-docker/" itemprop="url">环境隔离方案探索（一）、探索docker</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-27T11:20:00+08:00">
+                2018-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="docker"><a href="#docker" class="headerlink" title="docker"></a>docker</h1><h2 id="版本以及内核要求"><a href="#版本以及内核要求" class="headerlink" title="版本以及内核要求"></a>版本以及内核要求</h2><p>只支持64位架构</p>
+<table>
+<thead>
+<tr>
+<th>版本号</th>
+<th>内核版本</th>
+<th>依赖</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v1.4</td>
+<td>2.6.32-431 或更高</td>
+<td>EPEL</td>
+</tr>
+</tbody>
+</table>
+<p>centos6.5的内核版本已经满足要求了</p>
+<h2 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h2><h3 id="配置EPEL"><a href="#配置EPEL" class="headerlink" title="配置EPEL"></a>配置EPEL</h3><p>EPEL介绍： <a href="https://fedoraproject.org/wiki/EPEL/zh-cn" target="_blank" rel="external">https://fedoraproject.org/wiki/EPEL/zh-cn</a></p>
+<p>1、备份(如有配置其他epel源)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mv /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.backup</div><div class="line"></div><div class="line">mv /etc/yum.repos.d/epel-testing.repo /etc/yum.repos.d/epel-testing.repo.backup</div></pre></td></tr></table></figure>
+<p>2、下载新repo 到/etc/yum.repos.d/</p>
+<p>epel(RHEL 7)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo</div></pre></td></tr></table></figure>
+<p>epel(RHEL 6)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-6.repo</div></pre></td></tr></table></figure>
+<p>epel(RHEL 5)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-5.repo</div></pre></td></tr></table></figure>
+<h3 id="安装docker-1"><a href="#安装docker-1" class="headerlink" title="安装docker"></a>安装docker</h3><p>如果原来安装了docker，而不是docker-io，那么尝试先移除掉docker：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@st-test yum.repos.d]<span class="comment"># yum remove docker docker-common docker-selinux docker-engine</span></div></pre></td></tr></table></figure>
+<p>安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@st-test yum.repos.d]<span class="comment"># yum install docker-io</span></div></pre></td></tr></table></figure>
+<p>启动docker服务，并配置开机启动：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">[root@st-test yum.repos.d]<span class="comment"># service docker start</span></div><div class="line">Starting cgconfig service:                                 [  OK  ]</div><div class="line">Starting docker:	                                   [  OK  ]</div><div class="line">[root@st-test yum.repos.d]<span class="comment"># docker version</span></div><div class="line">Client version: 1.7.1</div><div class="line">Client API version: 1.19</div><div class="line">Go version (client): go1.4.2</div><div class="line">Git commit (client): 786b29d/1.7.1</div><div class="line">OS/Arch (client): linux/amd64</div><div class="line">Server version: 1.7.1</div><div class="line">Server API version: 1.19</div><div class="line">Go version (server): go1.4.2</div><div class="line">Git commit (server): 786b29d/1.7.1</div><div class="line">OS/Arch (server): linux/amd64</div><div class="line">[root@st-test yum.repos.d]<span class="comment"># chkconfig docker on</span></div></pre></td></tr></table></figure>
+<h3 id="双IP需求"><a href="#双IP需求" class="headerlink" title="双IP需求"></a>双IP需求</h3><p>需要两个独立的IP提供给两个程序时。解决按照难易程度排序：</p>
+<h4 id="1、更换使用不同的端口"><a href="#1、更换使用不同的端口" class="headerlink" title="1、更换使用不同的端口"></a>1、更换使用不同的端口</h4><p>这种方式对于容器来说就是透明的了，最最方便</p>
+<h4 id="2、为容器提供两个独立的IP"><a href="#2、为容器提供两个独立的IP" class="headerlink" title="2、为容器提供两个独立的IP"></a>2、为容器提供两个独立的IP</h4><p>容器启动后，由宿主机上的程序去重新绑定一个新的网卡到这个容器上。这种方式同样要求除了关心容器版本外，还得关心容器内的运行环境了</p>
+<h4 id="3、将两个程序分离到两个独立的容器中"><a href="#3、将两个程序分离到两个独立的容器中" class="headerlink" title="3、将两个程序分离到两个独立的容器中"></a>3、将两个程序分离到两个独立的容器中</h4><p>这种方式提高了管理上的复杂度，要求宿主机上有个管理程序进行控制</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2018/06/27/environmental-isolation-0-requirement-analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="单调">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好单调">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/27/environmental-isolation-0-requirement-analysis/" itemprop="url">环境隔离方案探索（零）、需求分析</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-27T11:17:47+08:00">
+                2018-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><p>我们有一批可以用来服务的节点，想基于这批服务器为客服提供一定的服务，同时能监控客户对我们这批服务器的使用情况，作为收费依据。</p>
+<p>实质就是一个资源提供方收取资源使用费的过程。这里资源提供方为我们的服务节点，资源使用方是客户的服务程序。</p>
+<p>我们先罗列出提供方和使用方的特征，然后分析出如何最好的提供服务：</p>
+<h4 id="节点特征："><a href="#节点特征：" class="headerlink" title="节点特征："></a>节点特征：</h4><ol>
+<li>环境各异：考虑到节点的来源，节点本身的环境各异的。</li>
+<li>还原性：即尽量不破坏掉节点原来的环境状态。</li>
+<li>不稳定性：考虑到节点的来源，机器本身是不受我们自己控制的。</li>
+<li>限制性：提供节点的用户，可能考虑只提供一部分节点资源给我们使用，所以会提出限制要求。</li>
+</ol>
+<h4 id="客户服务程序的特征："><a href="#客户服务程序的特征：" class="headerlink" title="客户服务程序的特征："></a>客户服务程序的特征：</h4><ol>
+<li>运行环境各异：我们要面对不同的客户，他们对环境的要求必然不一致。</li>
+<li>服务程序质量不可控：服务程序来源于不同的客户，其本身的质量问题不由我们自己控制。</li>
+<li>部署上线的难易程度不一：客户的服务程序，部署方式各异，难易程度各异</li>
+</ol>
+<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>根据节点的特征和服务程序的特征，由两者的特征1和特征2，可以确定必须要做<strong>环境隔离</strong>，不然无法最大化客户和节点的匹配，且服务保护节点的环境。节点的特征3则只能通过冗余来变相提高稳定性，客户服务程序的特征3，则只能通过提高自动化程度来优化，实质上就是客户程序的线上运维工作。节点特征4，则要求我们的系统能够在一定范围内使用资源，不要超出，所以需要对使用情况做<strong>限制管理</strong>。</p>
+<p>需求中也提到，需要监控客户程序使用的资源，作为收费依据，所以要有相应的<strong>监控方案</strong>。</p>
+<p>因此，我们要设计出一套能<strong>对实际使用资源做监控管理的环境隔离</strong>系统。</p>
+<h4 id="环境隔离"><a href="#环境隔离" class="headerlink" title="环境隔离"></a>环境隔离</h4><p>最容易想到的就是当前流行的容器化技术，以Docker为代表。还有就是以虚拟机为代表的技术。当然两者的虚拟化程度并不一样，能满足的环境要求也就不一样了。</p>
+<h4 id="监控方案"><a href="#监控方案" class="headerlink" title="监控方案"></a>监控方案</h4><p>对服务使用资源的监控，如果是将服务装进隔离环境中运行，则可以演变成对隔离环境使用资源的监控。比如监控隔离环境使用的带宽，监控隔离环境使用的CPU，监控隔离环境使用的内存和硬盘等。</p>
+<p>这个监控方案需要根据特定的环境隔离技术来做设计。</p>
+<h4 id="管理方案"><a href="#管理方案" class="headerlink" title="管理方案"></a>管理方案</h4><p>管理方案实质是需要对资源的使用上线做管理，一般来说就是对监控方案的不断检查来限制使用。</p>
+<p>所以具体的也根据监控方案来定。</p>
+<h1 id="方案初定"><a href="#方案初定" class="headerlink" title="方案初定"></a>方案初定</h1><p>综上分析，我们需要以环境隔离方案为切入点，进一步去设计监控管理方案。所以接下来，将详细探索不同的环境隔离方案的优劣，主要从下面两个环境隔离方案入手：</p>
+<ol>
+<li>容器：具体的就是从docker入手。</li>
+<li>虚拟机：具体的从virtualbox入手。</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -418,1308 +2122,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2017/12/19/sync-time-to-china/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="单调">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="好好单调">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/12/19/sync-time-to-china/" itemprop="url">cenos同步时间到中国</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-19T19:06:50+08:00">
-                2017-12-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术/" itemprop="url" rel="index">
-                    <span itemprop="name">技术</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>最近从一个镜像安装的centos时间老是不对，所以从网上搜索组装出一个修改时区到中国，并定期自动同步时间的脚本。仅在centos下用过。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/12/19/sync-time-to-china/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2017/12/16/reverse-proxy-for-ssh-by-nginx/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="单调">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="好好单调">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/12/16/reverse-proxy-for-ssh-by-nginx/" itemprop="url">nginx实现对ssh的反代</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-16T20:43:10+08:00">
-                2017-12-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术/" itemprop="url" rel="index">
-                    <span itemprop="name">技术</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>有3台服务器A、B、G。其中A和B在内网，G接的外网。如何在外网直接SSH到A和B，达到对于使用者来说相当于是直接操作的A和B一样的效果。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/12/16/reverse-proxy-for-ssh-by-nginx/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2017/12/16/install-remotebox-in-macos/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="单调">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="好好单调">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/12/16/install-remotebox-in-macos/" itemprop="url">macos下安装remotebox</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-16T18:49:37+08:00">
-                2017-12-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术/" itemprop="url" rel="index">
-                    <span itemprop="name">技术</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>要在centos命令行系统中安装一个特定系统的虚拟机来使用，之前没通过命令行装过，又赶时间要用，所以就想抄捷径，弄个远程GUI管理工具来用。就搜索到了remotebox，这里记下来。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/12/16/install-remotebox-in-macos/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2016/02/29/share-wallpaper-for-programmer/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="单调">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="好好单调">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/02/29/share-wallpaper-for-programmer/" itemprop="url">分享给程序员的壁纸</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-29T12:11:25+08:00">
-                2016-02-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术/" itemprop="url" rel="index">
-                    <span itemprop="name">技术</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>总觉得默认的壁纸不符合程序员的气质，外加上我喜欢简单耐看的背景壁纸，所以就上 google 搜索了下关键字 programmer wallpaper，找到了几款挺喜欢的，随便贴几张在下面，另外已经分享在百度网盘了<a href="http://pan.baidu.com/s/1nug2b7z" target="_blank" rel="external">http://pan.baidu.com/s/1nug2b7z</a>。<br>还有就是壁纸主要来源于国外网站： <a href="https://wall.alphacoders.com/sub_categories.php?id=30" target="_blank" rel="external">https://wall.alphacoders.com/sub_categories.php?id=30</a><br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/02/29/share-wallpaper-for-programmer/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2015/12/05/Restudy-cpp/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="单调">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="好好单调">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/05/Restudy-cpp/" itemprop="url">重拾 c++ </a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-05T00:15:52+08:00">
-                2015-12-05
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术/" itemprop="url" rel="index">
-                    <span itemprop="name">技术</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>C++由来已久，也做了好几年了，但是还是有好多功能没用到过，并且随着 c++11的推出，增加了不少新功能，这里开始做笔记。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2015/12/05/Restudy-cpp/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2015/12/04/elegant-parser-multidimensional-string-to-specified-type/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="单调">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="好好单调">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/04/elegant-parser-multidimensional-string-to-specified-type/" itemprop="url">如何优雅的解析多维字符串到指定类型</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-04T19:05:20+08:00">
-                2015-12-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术/" itemprop="url" rel="index">
-                    <span itemprop="name">技术</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>有时候会有从数据库或者其他地方拿到一组数据，全是字符串类型，然后需要自己根据实际需要的使用类型去进行转换。（我遇到这个恰好是在mysql查询读出来的数据时，是个二维的字符串数组）。</p>
-<p>先引出最简单的一种情况，明确知道将要解析出来的类型和个数。通常就直接如下解决。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">std</span>::<span class="built_in">array</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>, 2&gt; iDataArray;</div><div class="line">iDataArray[<span class="number">0</span>] = <span class="string">"1"</span>;</div><div class="line">iDataArray[<span class="number">1</span>] = <span class="string">"dandiao"</span>;</div><div class="line"><span class="built_in">cout</span> &lt;&lt; <span class="string">"1			user_id = "</span> &lt;&lt; <span class="built_in">std</span>::stoi(iDataArray[<span class="number">0</span>]) &lt;&lt; <span class="string">", user_nick = "</span> &lt;&lt; iDataArray[<span class="number">1</span>] &lt;&lt; <span class="built_in">endl</span>;</div></pre></td></tr></table></figure></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2015/12/04/elegant-parser-multidimensional-string-to-specified-type/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2015/12/03/From-Octopress-to-Hexo-note/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="单调">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="好好单调">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/03/From-Octopress-to-Hexo-note/" itemprop="url">从 Octopress 到 Hexo 笔记</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-03T13:11:53+08:00">
-                2015-12-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>好吧，我又折腾了。本来就没写几篇博客，现在又从 Octopress 折腾到 Hexo。其实折腾真的嫌累，再加上我经常懒癌发作，时间已久，自己都不知道怎么折腾出来的了，真心觉得这些东西还是越简单越好。</p>
-<p>Hexo 相对于 Octopress 的优势自行百度吧，反正我的体会就是安装和部署什么的都相当简单了，而且之前我没在 windows 上部署过，现在 windows 上也只需要安装 nodejs 和 git 就可以直接使用 Hexo 了，确实方便啊，不信你去看看官网的介绍，就几个命令就可以预览了。</p>
-<p>配置的话，我也不多说啦，官网有中文说明文档，也够清楚了。还不清楚的可以去百度一下教程，也是相当简单。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2015/12/03/From-Octopress-to-Hexo-note/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2015/06/14/Octopress-config/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="单调">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="好好单调">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/06/14/Octopress-config/" itemprop="url">Octopress 设置</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-06-14T20:21:05+08:00">
-                2015-06-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术/" itemprop="url" rel="index">
-                    <span itemprop="name">技术</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>在GitHub上搜索关键字<code>octopress theme</code>，然后按照星数排序，前面几个我都试过了，特别是<a href="https://github.com/shashankmehta/greyshade" target="_blank" rel="external">greyshade</a>主题，我是比较喜欢的，但是主题这东西除了考虑好看之外，还要考虑适不适合添加其他的东西，比如文章分类啊，标签云啊，近期文章啊，热评文章啊等等（这些是我在折腾了好几个主题后才考虑到的）。就是因为前面没考虑到这些，所以折腾了好久之后又更换主题又重新设置（我也是醉了）。最终还是绝得默认的经典主题比较适合加这些东西。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2015/06/14/Octopress-config/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://monotone.github.io/2015/06/14/Choose-Octopress /">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="单调">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="好好单调">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/06/14/Choose-Octopress /" itemprop="url">选择 Octopress</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-06-14T16:21:05+08:00">
-                2015-06-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术/" itemprop="url" rel="index">
-                    <span itemprop="name">技术</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>上次在GitHub上搭建好Octopress之后，我就去尝试为Octopress增加其他设置，比如评论系统等。了解到这一切的前提是先选择好一个主题，因为后面的这些设置都是根据主题来的，一旦主题发生更换，这些设置就又需要重新设置。  </p>
-<p>问题在挑选主题的过程中，似乎有点少，然后同时也发现了一个博客平台叫Ghost的（这货不是操作系统镜像吗？）。</p>
-<p>初步了解了之后，发现它比较新，并且能在线直接用Markdown编辑博客，还有一个我特别喜欢的功能，就是图片占位符，就是你在写的过程中可以先使用<code>![占位符描述]()</code>这种语法先占着图片的位置，然后最后只需要点击预览界面上的这个占位图，就会弹出一个对话框然你选择图片上传到博客平台上去，同时杠杠空白的<code>()</code>中的内容就变成了类似于本地的图片文件目录。想了解的考验去体验一下，我个人非常喜欢这个功能。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2015/06/14/Choose-Octopress /#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1767,9 +2174,9 @@
             
               <div class="site-state-item site-state-posts">
               
-                <a href="/archives/">
+                <a href="/archives">
               
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">21</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1780,7 +2187,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">2</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -1791,7 +2198,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-count">23</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
